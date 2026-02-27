@@ -35,12 +35,12 @@ interface JobDetailViewProps {
     id: string
     title: string
     description: string
-    backendWeight: number
-    consistencyWeight: number
-    collaborationWeight: number
-    recencyWeight: number
-    impactWeight: number
-    cgpaWeight: number
+    backendWeight: number | string
+    consistencyWeight: number | string
+    collaborationWeight: number | string
+    recencyWeight: number | string
+    impactWeight: number | string
+    cgpaWeight: number | string
     minThreshold: number
     createdAt: string
   }
@@ -57,6 +57,16 @@ function getRiskBadgeClass(level: string) {
 }
 
 export function JobDetailView({ job, matches }: JobDetailViewProps) {
+  const getWeightDisplay = (val: number | string) => {
+    if (typeof val === "string") {
+      const label = val.charAt(0).toUpperCase() + val.slice(1)
+      const percent = val === "critical" ? 100 : val === "important" ? 65 : 35
+      return { label, percent, text: label }
+    }
+    const num = Number(val)
+    return { label: "", percent: num * 100, text: `${(num * 100).toFixed(0)}%` }
+  }
+
   const weightItems = [
     { label: "Backend", value: job.backendWeight },
     { label: "Consistency", value: job.consistencyWeight },
@@ -76,7 +86,7 @@ export function JobDetailView({ job, matches }: JobDetailViewProps) {
         <Link href={`/recruiter/match/${job.id}`}>
           <Button className="gap-2">
             <Trophy className="h-4 w-4" />
-            Weight Simulator
+            Match Engine
           </Button>
         </Link>
       </div>
@@ -127,15 +137,21 @@ export function JobDetailView({ job, matches }: JobDetailViewProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-            {weightItems.map((w) => (
-              <div key={w.label} className="space-y-1 text-center">
-                <p className="text-xs text-muted-foreground">{w.label}</p>
-                <p className="text-lg font-bold text-primary">{(w.value * 100).toFixed(0)}%</p>
-                <div className="mx-auto h-1.5 w-full rounded-full bg-muted">
-                  <div className="h-1.5 rounded-full bg-primary" style={{ width: `${w.value * 100}%` }} />
+            {weightItems.map((w) => {
+              const display = getWeightDisplay(w.value)
+              return (
+                <div key={w.label} className="space-y-1 text-center">
+                  <p className="text-xs text-muted-foreground">{w.label}</p>
+                  <p className="text-lg font-bold text-primary">{display.text}</p>
+                  <div className="mx-auto h-1.5 w-full rounded-full bg-muted">
+                    <div
+                      className="h-1.5 rounded-full bg-primary transition-all"
+                      style={{ width: `${display.percent}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </CardContent>
       </Card>

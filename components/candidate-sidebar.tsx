@@ -11,6 +11,8 @@ import {
   User,
   BarChart3,
   TrendingUp,
+  Briefcase,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -21,6 +23,8 @@ const candidateNav = [
   { href: "/candidate/profile", label: "Profile", icon: User },
   { href: "/candidate/skills", label: "Skills", icon: BarChart3 },
   { href: "/candidate/improvement", label: "Improvement", icon: TrendingUp },
+  { href: "/candidate/jobs", label: "Jobs", icon: Briefcase },
+  { href: "/candidate/resume", label: "Resume", icon: FileText },
 ]
 
 export function CandidateSidebar() {

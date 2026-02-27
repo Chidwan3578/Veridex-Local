@@ -34,14 +34,15 @@ export async function updateProfileAction(formData: FormData) {
         const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate)
 
         // Update candidate profile
+        const existingProfile = db.candidateProfile.findByUserId(user.id)
         db.candidateProfile.upsertByUserId(user.id, {
             cgpa,
             githubUsername,
-            // Keep other fields as they are (in-memory db upsert handles this)
             overallScore,
             riskScore: "Low",
             dataCompleteness: 100,
             lastActiveDate,
+            resumeText: existingProfile?.resumeText || null,
         })
 
         revalidatePath("/candidate/dashboard")
@@ -50,4 +51,25 @@ export async function updateProfileAction(formData: FormData) {
         console.error("Error updating profile:", error)
         return { error: "Failed to update profile" }
     }
+}
+
+export async function updateResumeAction(resumeText: string) {
+    const user = await getSession()
+    if (!user || user.role !== "candidate") throw new Error("Unauthorized")
+
+    const existingProfile = db.candidateProfile.findByUserId(user.id)
+
+    db.candidateProfile.upsertByUserId(user.id, {
+        githubUsername: existingProfile?.githubUsername || "",
+        cgpa: existingProfile?.cgpa || 0,
+        overallScore: existingProfile?.overallScore || 0,
+        riskScore: existingProfile?.riskScore || "Low",
+        dataCompleteness: existingProfile?.dataCompleteness || 0,
+        lastActiveDate: existingProfile?.lastActiveDate || new Date(),
+        resumeText,
+    })
+
+    revalidatePath("/candidate/resume")
+    revalidatePath("/candidate/profile")
+    return { success: true }
 }

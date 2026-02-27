@@ -20,6 +20,7 @@ export interface CandidateProfile {
   riskScore: string
   dataCompleteness: number
   lastActiveDate: Date
+  resumeText: string | null
 }
 
 export interface Skill {
@@ -221,6 +222,7 @@ export function seedDatabase() {
     riskScore: "Low",
     dataCompleteness: 95,
     lastActiveDate: new Date("2026-02-15"),
+    resumeText: "Experienced Full-Stack Developer with expertise in React, Node.js, and TypeScript. Strong background in building scalable web applications and working with PostgreSQL databases.",
   })
   db.candidateProfile.create({
     userId: candidate2.id,
@@ -230,6 +232,7 @@ export function seedDatabase() {
     riskScore: "Medium",
     dataCompleteness: 80,
     lastActiveDate: new Date("2025-11-20"),
+    resumeText: null,
   })
   db.candidateProfile.create({
     userId: candidate3.id,
@@ -239,6 +242,7 @@ export function seedDatabase() {
     riskScore: "Low",
     dataCompleteness: 98,
     lastActiveDate: new Date("2026-02-25"),
+    resumeText: "Data Scientist specializing in Machine Learning, Python, and TensorFlow. Proficient in data analysis and building predictive models.",
   })
 
   // Skills for candidate 1

@@ -40,6 +40,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       gapSummary: `Overall: complexity ${avgComplexity.toFixed(0)}, consistency ${avgConsistency.toFixed(0)}, collaboration ${avgCollaboration.toFixed(0)}, recency ${avgRecency.toFixed(0)}, impact ${avgImpact.toFixed(0)}, CGPA ${normalizeCGPA(profile.cgpa).toFixed(0)}/100`,
       cgpa: profile.cgpa,
       githubData,
+      resumeText: profile.resumeText,
       skillBreakdown: {
         complexity: avgComplexity,
         consistency: avgConsistency,

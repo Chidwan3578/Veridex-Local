@@ -20,6 +20,11 @@ export interface CandidateProfile {
   riskScore: string
   dataCompleteness: number
   lastActiveDate: Date
+  leetcodeUsername: string | null
+  leetcodeScore: number | null
+  leetcodeRank: number | null
+  linkedinUrl: string | null
+  linkedinCertificationsCount: number | null
   resumeText: string | null
 }
 
@@ -214,15 +219,21 @@ export function seedDatabase() {
   })
 
   // Candidate profiles
+  // Candidate profiles
   db.candidateProfile.create({
     userId: candidate1.id,
     githubUsername: "alexmorgan",
     cgpa: 9.5,
-    overallScore: 82,
+    overallScore: 88,
     riskScore: "Low",
-    dataCompleteness: 95,
+    dataCompleteness: 98,
     lastActiveDate: new Date("2026-02-15"),
-    resumeText: "Experienced Full-Stack Developer with expertise in React, Node.js, and TypeScript. Strong background in building scalable web applications and working with PostgreSQL databases.",
+    leetcodeUsername: "alex_m_codes",
+    leetcodeScore: 2150,
+    leetcodeRank: 12000,
+    linkedinUrl: "https://linkedin.com/in/alexmorgan-dev",
+    linkedinCertificationsCount: 7,
+    resumeText: "Senior Full-Stack Developer with expertise in React, Node.js, and Cloud Infrastructure. Proven track record of leading technical teams and delivering high-impact features.",
   })
   db.candidateProfile.create({
     userId: candidate2.id,
@@ -232,6 +243,11 @@ export function seedDatabase() {
     riskScore: "Medium",
     dataCompleteness: 80,
     lastActiveDate: new Date("2025-11-20"),
+    leetcodeUsername: "jrivera",
+    leetcodeScore: 1200,
+    leetcodeRank: 150000,
+    linkedinUrl: "https://linkedin.com/in/jrivera",
+    linkedinCertificationsCount: 1,
     resumeText: null,
   })
   db.candidateProfile.create({
@@ -242,7 +258,52 @@ export function seedDatabase() {
     riskScore: "Low",
     dataCompleteness: 98,
     lastActiveDate: new Date("2026-02-25"),
+    leetcodeUsername: "psharma",
+    leetcodeScore: 2400,
+    leetcodeRank: 5000,
+    linkedinUrl: "https://linkedin.com/in/priyasharma",
+    linkedinCertificationsCount: 8,
     resumeText: "Data Scientist specializing in Machine Learning, Python, and TensorFlow. Proficient in data analysis and building predictive models.",
+  })
+
+  // Demo Master Profile
+  const demoMaster = db.user.create({
+    name: "Demo Master",
+    email: "demo@veridex.io",
+    password: "password123",
+    role: "candidate",
+    image: null,
+  })
+
+  db.candidateProfile.create({
+    userId: demoMaster.id,
+    githubUsername: "demomaster",
+    cgpa: 9.9,
+    overallScore: 94,
+    riskScore: "Low",
+    dataCompleteness: 100,
+    lastActiveDate: new Date(),
+    leetcodeUsername: "demomaster_lc",
+    leetcodeScore: 2850,
+    leetcodeRank: 120,
+    linkedinUrl: "https://linkedin.com/in/demomaster",
+    linkedinCertificationsCount: 12,
+    resumeText: "Elite Software Engineer with expertise in distributed systems, AI, and cloud architecture. LeetCode Guardian and multi-certified cloud professional.",
+  })
+
+  // Skills for Demo Master
+  const demoSkills = [
+    { name: "System Design", score: 96, complexityScore: 98, consistencyScore: 95, collaborationScore: 92, recencyScore: 98, impactScore: 95, certificationBonus: 95 },
+    { name: "Algorithms", score: 98, complexityScore: 99, consistencyScore: 98, collaborationScore: 90, recencyScore: 99, impactScore: 94, certificationBonus: 90 },
+    { name: "Cloud Architecture", score: 92, complexityScore: 90, consistencyScore: 92, collaborationScore: 95, recencyScore: 90, impactScore: 92, certificationBonus: 100 },
+  ]
+
+  demoSkills.forEach((s) => {
+    const skill = db.skill.create({ candidateId: demoMaster.id, ...s })
+    const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
+    months.forEach((m, i) => {
+      db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(70, s.score - 10 + i * 2 + Math.floor(Math.random() * 3)) })
+    })
   })
 
   // Skills for candidate 1

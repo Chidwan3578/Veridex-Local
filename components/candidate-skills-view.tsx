@@ -229,9 +229,11 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
                     type="monotone"
                     dataKey={skill.name}
                     stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 2, fill: "var(--color-card)" }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
                   />
                 ))}
               </LineChart>

@@ -15,6 +15,11 @@ export async function updateProfileAction(formData: FormData) {
     const name = formData.get("name") as string
     const cgpa = parseFloat(formData.get("cgpa") as string)
     const githubUsername = formData.get("githubUsername") as string
+    const leetcodeUsername = formData.get("leetcodeUsername") as string
+    const leetcodeScore = parseFloat(formData.get("leetcodeScore") as string) || 0
+    const leetcodeRank = parseInt(formData.get("leetcodeRank") as string) || 0
+    const linkedinUrl = formData.get("linkedinUrl") as string
+    const linkedinCertificationsCount = parseInt(formData.get("linkedinCertificationsCount") as string) || 0
 
     if (!name || isNaN(cgpa)) {
         return { error: "Name and valid CGPA are required" }
@@ -31,13 +36,18 @@ export async function updateProfileAction(formData: FormData) {
         // Fetch skills to calculate overall score
         const skills = db.skill.findByCandidateId(user.id)
         const lastActiveDate = new Date()
-        const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate)
+        const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate, leetcodeScore, linkedinCertificationsCount)
 
         // Update candidate profile
         const existingProfile = db.candidateProfile.findByUserId(user.id)
         db.candidateProfile.upsertByUserId(user.id, {
             cgpa,
             githubUsername,
+            leetcodeUsername,
+            leetcodeScore,
+            leetcodeRank,
+            linkedinUrl,
+            linkedinCertificationsCount,
             overallScore,
             riskScore: "Low",
             dataCompleteness: 100,
@@ -62,6 +72,11 @@ export async function updateResumeAction(resumeText: string) {
     db.candidateProfile.upsertByUserId(user.id, {
         githubUsername: existingProfile?.githubUsername || "",
         cgpa: existingProfile?.cgpa || 0,
+        leetcodeUsername: existingProfile?.leetcodeUsername || null,
+        leetcodeScore: existingProfile?.leetcodeScore || 0,
+        leetcodeRank: existingProfile?.leetcodeRank || 0,
+        linkedinUrl: existingProfile?.linkedinUrl || null,
+        linkedinCertificationsCount: existingProfile?.linkedinCertificationsCount || 0,
         overallScore: existingProfile?.overallScore || 0,
         riskScore: existingProfile?.riskScore || "Low",
         dataCompleteness: existingProfile?.dataCompleteness || 0,

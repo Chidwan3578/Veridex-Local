@@ -33,7 +33,11 @@ import {
   Activity,
   BarChart3,
   Calendar,
+  Trophy,
+  Linkedin,
 } from "lucide-react"
+import { LeetCodeView } from "./leetcode-view"
+import { LinkedInView } from "./linkedin-view"
 
 interface CandidateProfileViewProps {
   user: {
@@ -44,6 +48,11 @@ interface CandidateProfileViewProps {
   }
   profile: {
     githubUsername: string
+    leetcodeUsername: string | null
+    leetcodeScore: number | null
+    leetcodeRank: number | null
+    linkedinUrl: string | null
+    linkedinCertificationsCount: number | null
     cgpa: number
     overallScore: number
     riskScore: string
@@ -127,6 +136,52 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
                     id="githubUsername"
                     name="githubUsername"
                     defaultValue={profile?.githubUsername}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-white">
+                <div className="space-y-2">
+                  <Label htmlFor="leetcodeUsername">LeetCode Username</Label>
+                  <Input
+                    id="leetcodeUsername"
+                    name="leetcodeUsername"
+                    defaultValue={profile?.leetcodeUsername || ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="leetcodeScore">LeetCode Score</Label>
+                  <Input
+                    id="leetcodeScore"
+                    name="leetcodeScore"
+                    type="number"
+                    defaultValue={profile?.leetcodeScore || 0}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="leetcodeRank">LeetCode Rank</Label>
+                  <Input
+                    id="leetcodeRank"
+                    name="leetcodeRank"
+                    type="number"
+                    defaultValue={profile?.leetcodeRank || 0}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                  <Input
+                    id="linkedinUrl"
+                    name="linkedinUrl"
+                    defaultValue={profile?.linkedinUrl || ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="linkedinCertificationsCount">LinkedIn Certs Count</Label>
+                  <Input
+                    id="linkedinCertificationsCount"
+                    name="linkedinCertificationsCount"
+                    type="number"
+                    defaultValue={profile?.linkedinCertificationsCount || 0}
                   />
                 </div>
               </div>
@@ -241,6 +296,27 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
         </Card>
 
         <Card className="bg-card lg:col-span-2">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-card-foreground">External Profiles</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <LeetCodeView
+                username={profile?.leetcodeUsername || null}
+                score={profile?.leetcodeScore || null}
+                rank={profile?.leetcodeRank || null}
+              />
+              <LinkedInView
+                url={profile?.linkedinUrl || null}
+                certificationsCount={profile?.linkedinCertificationsCount || null}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card lg:col-span-3">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-card-foreground">GitHub Activity</CardTitle>

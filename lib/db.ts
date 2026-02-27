@@ -47,12 +47,13 @@ export interface Job {
   recruiterId: string
   title: string
   description: string
-  backendWeight: number
-  consistencyWeight: number
-  collaborationWeight: number
-  recencyWeight: number
-  impactWeight: number
-  cgpaWeight: number
+  backendPriority: "critical" | "important" | "optional"
+  consistencyPriority: "critical" | "important" | "optional"
+  collaborationPriority: "critical" | "important" | "optional"
+  recencyPriority: "critical" | "important" | "optional"
+  impactPriority: "critical" | "important" | "optional"
+  cgpaThreshold: number | null
+  cgpaCondition: "above" | "below" | null
   minThreshold: number
   createdAt: Date
 }

@@ -1,5 +1,12 @@
 "use client"
 
+import dynamic from "next/dynamic"
+
+const ShaderGradient = dynamic(
+  () => import("@/components/ui/shader-gradient-wrapper").then((mod) => mod.ShaderGradientWrapper),
+  { ssr: false }
+)
+
 import {
   Radar,
   SlidersHorizontal,
@@ -47,13 +54,6 @@ const features = [
       "Track scoring history over time with line charts. Understand consistency patterns and identify contribution spikes or declines.",
   },
 ]
-
-import dynamic from "next/dynamic"
-
-const ShaderGradient = dynamic(
-  () => import("@/components/ui/shader-gradient-wrapper").then((mod) => mod.ShaderGradientWrapper),
-  { ssr: false }
-)
 
 export function FeaturesSection() {
   return (

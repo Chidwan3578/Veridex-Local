@@ -10,28 +10,32 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { AlertCircle, Briefcase } from "lucide-react"
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 export default function CreateJobPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const [weights, setWeights] = useState({
-    backendWeight: 0.25,
-    consistencyWeight: 0.20,
-    collaborationWeight: 0.15,
-    recencyWeight: 0.15,
-    impactWeight: 0.15,
-    cgpaWeight: 0.10,
+  const [priorities, setPriorities] = useState({
+    backendWeight: "important",
+    consistencyWeight: "important",
+    collaborationWeight: "optional",
+    recencyWeight: "important",
+    impactWeight: "important",
   })
+  const [cgpaThreshold, setCgpaThreshold] = useState("7.0")
+  const [cgpaCondition, setCgpaCondition] = useState("above")
   const [minThreshold, setMinThreshold] = useState(50)
-
-  const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError("")
-    Object.entries(weights).forEach(([key, value]) => {
-      formData.set(key, value.toString())
+    Object.entries(priorities).forEach(([key, value]) => {
+      formData.set(key, value)
     })
+    formData.set("cgpaThreshold", cgpaThreshold)
+    formData.set("cgpaCondition", cgpaCondition)
     formData.set("minThreshold", minThreshold.toString())
+
     const result = await createJobAction(formData)
     if (result?.error) {
       setError(result.error)
@@ -39,20 +43,19 @@ export default function CreateJobPage() {
     }
   }
 
-  const weightSliders = [
+  const priorityFields = [
     { key: "backendWeight" as const, label: "Backend / Complexity" },
     { key: "consistencyWeight" as const, label: "Consistency" },
     { key: "collaborationWeight" as const, label: "Collaboration" },
     { key: "recencyWeight" as const, label: "Recency" },
     { key: "impactWeight" as const, label: "Impact" },
-    { key: "cgpaWeight" as const, label: "CGPA" },
   ]
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Create Job</h1>
-        <p className="text-muted-foreground">Define a job posting and set matching weights</p>
+        <p className="text-muted-foreground">Define a job posting and set matching priorities</p>
       </div>
 
       <form action={handleSubmit} className="space-y-6">
@@ -97,40 +100,81 @@ export default function CreateJobPage() {
 
         <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-card-foreground">Matching Weights</CardTitle>
+            <CardTitle className="text-card-foreground">Matching Priorities</CardTitle>
             <CardDescription>
-              Adjust how each dimension affects candidate ranking.
-              Total: <span className={`font-bold ${Math.abs(totalWeight - 1) < 0.01 ? "text-accent" : "text-destructive"}`}>
-                {(totalWeight * 100).toFixed(0)}%
-              </span>
-              {Math.abs(totalWeight - 1) > 0.01 && (
-                <span className="text-destructive"> (should be 100%)</span>
-              )}
+              Assign a priority level to each dimension for candidate ranking.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {weightSliders.map(({ key, label }) => (
-              <div key={key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-card-foreground">{label}</Label>
-                  <span className="text-sm font-mono text-muted-foreground">
-                    {(weights[key] * 100).toFixed(0)}%
-                  </span>
+          <CardContent className="space-y-4">
+            {priorityFields.map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between gap-4">
+                <Label className="text-card-foreground">{label}</Label>
+                <div className="w-[180px]">
+                  <Select
+                    value={priorities[key]}
+                    onValueChange={(v) => setPriorities((prev) => ({ ...prev, [key]: v }))}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical (2.0x)</SelectItem>
+                      <SelectItem value="important">Important (1.3x)</SelectItem>
+                      <SelectItem value="optional">Optional (1.0x)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Slider
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={[weights[key] * 100]}
-                  onValueChange={([v]) => setWeights((prev) => ({ ...prev, [key]: v / 100 }))}
-                />
               </div>
             ))}
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2 border-t border-border pt-4">
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle className="text-card-foreground">CGPA Threshold Filter</CardTitle>
+            <CardDescription>
+              Exclude candidates based on CGPA requirement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-card-foreground">Condition</Label>
+                <Select value={cgpaCondition} onValueChange={setCgpaCondition}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="above">Above or Equal</SelectItem>
+                    <SelectItem value="below">Below or Equal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-card-foreground">CGPA Value (0-10)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  value={cgpaThreshold}
+                  onChange={(e) => setCgpaThreshold(e.target.value)}
+                  className="bg-background"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle className="text-card-foreground">Fit Score Threshold</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-card-foreground">Minimum Threshold</Label>
-                <span className="text-sm font-mono text-muted-foreground">{minThreshold}</span>
+                <Label className="text-card-foreground">Minimum Fit Score (%)</Label>
+                <span className="text-sm font-mono text-muted-foreground">{minThreshold}%</span>
               </div>
               <Slider
                 min={0}
@@ -140,7 +184,7 @@ export default function CreateJobPage() {
                 onValueChange={([v]) => setMinThreshold(v)}
               />
               <p className="text-xs text-muted-foreground">
-                Candidates scoring below this threshold will be filtered out
+                Candidates with a normalized fit score below this will be hidden.
               </p>
             </div>
           </CardContent>

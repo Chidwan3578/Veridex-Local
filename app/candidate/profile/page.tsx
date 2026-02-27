@@ -1,13 +1,15 @@
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { CandidateProfileView } from "@/components/candidate-profile-view"
+import { fetchGitHubData } from "@/lib/github"
 
 export default async function CandidateProfilePage() {
   const user = await getSession()
   if (!user) redirect("/login")
 
   const profile = db.candidateProfile.findByUserId(user.id)
+  const githubData = profile?.githubUsername ? await fetchGitHubData(profile.githubUsername) : null
   const skills = profile ? db.skill.findByCandidateId(user.id) : []
 
   return (
@@ -22,6 +24,7 @@ export default async function CandidateProfilePage() {
         lastActiveDate: profile.lastActiveDate.toISOString(),
       } : null}
       skillCount={skills.length}
+      githubData={githubData}
     />
   )
 }

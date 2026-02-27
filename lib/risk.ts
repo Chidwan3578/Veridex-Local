@@ -10,9 +10,12 @@ export interface RiskAssessment {
   score: number
 }
 
+import type { GitHubData } from "./github"
+
 export function assessRisk(
   profile: CandidateProfile,
-  skills: Skill[]
+  skills: Skill[],
+  githubData?: GitHubData | null
 ): RiskAssessment {
   const factors: string[] = []
   let riskScore = 0
@@ -26,6 +29,29 @@ export function assessRisk(
     riskScore += 25
   } else if (monthsInactive > 3) {
     factors.push("Reduced activity in past 3 months")
+    riskScore += 10
+  }
+
+  // GitHub activity check
+  if (githubData) {
+    if (githubData.publicRepos === 0) {
+      factors.push("No public GitHub repositories")
+      riskScore += 20
+    }
+
+    if (githubData.lastActivity) {
+      const lastGitActive = new Date(githubData.lastActivity)
+      const monthsGitInactive = (now.getTime() - lastGitActive.getTime()) / (1000 * 60 * 60 * 24 * 30)
+      if (monthsGitInactive > 6) {
+        factors.push("No GitHub activity in last 6 months")
+        riskScore += 20
+      }
+    } else {
+      factors.push("No GitHub activity record")
+      riskScore += 15
+    }
+  } else if (profile.githubUsername) {
+    factors.push("GitHub data unavailable")
     riskScore += 10
   }
 
@@ -50,12 +76,12 @@ export function assessRisk(
   }
 
   // Check extremely low CGPA
-  if (profile.cgpa < 2.0) {
-    factors.push("Extremely low CGPA")
-    riskScore += 25
-  } else if (profile.cgpa < 2.5) {
+  if (profile.cgpa < 6.0) {
+    factors.push("CGPA below threshold (6.0)")
+    riskScore += 30
+  } else if (profile.cgpa < 7.0) {
     factors.push("Below average CGPA")
-    riskScore += 10
+    riskScore += 15
   }
 
   // Check single skill dominance
@@ -76,8 +102,8 @@ export function assessRisk(
   }
 
   let level: RiskLevel = "Low"
-  if (riskScore >= 50) level = "High"
-  else if (riskScore >= 25) level = "Medium"
+  if (riskScore >= 60) level = "High"
+  else if (riskScore >= 30) level = "Medium"
 
   return { level, factors, score: riskScore }
 }

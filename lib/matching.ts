@@ -60,6 +60,19 @@ function generateGapSummary(
   return summary.join(" ") || "Balanced profile with no significant gaps."
 }
 
+const PRIORITY_MULTIPLIERS: Record<string, number> = {
+  critical: 2.0,
+  important: 1.3,
+  optional: 1.0,
+}
+
+function getMultiplier(weight: number | string): number {
+  if (typeof weight === "string") {
+    return PRIORITY_MULTIPLIERS[weight.toLowerCase()] || 1.0
+  }
+  return 1.0 // Default to optional if it's a number (legacy)
+}
+
 export function calculateFitScore(
   skills: Skill[],
   profile: CandidateProfile,
@@ -70,17 +83,25 @@ export function calculateFitScore(
   const avgCollaboration = getAverageSkillDimension(skills, "collaborationScore")
   const avgRecency = getAverageSkillDimension(skills, "recencyScore")
   const avgImpact = getAverageSkillDimension(skills, "impactScore")
-  const normalizedCGPA = normalizeCGPA(profile.cgpa)
 
   const fitScore =
-    job.backendWeight * avgComplexity +
-    job.consistencyWeight * avgConsistency +
-    job.collaborationWeight * avgCollaboration +
-    job.recencyWeight * avgRecency +
-    job.impactWeight * avgImpact +
-    job.cgpaWeight * normalizedCGPA
+    getMultiplier(job.backendWeight) * avgComplexity +
+    getMultiplier(job.consistencyWeight) * avgConsistency +
+    getMultiplier(job.collaborationWeight) * avgCollaboration +
+    getMultiplier(job.recencyWeight) * avgRecency +
+    getMultiplier(job.impactWeight) * avgImpact
 
-  return Math.round(fitScore * 100) / 100
+  // Normalize score (sum of multipliers * 100 would be max score)
+  const maxMultiplierSum =
+    getMultiplier(job.backendWeight) +
+    getMultiplier(job.consistencyWeight) +
+    getMultiplier(job.collaborationWeight) +
+    getMultiplier(job.recencyWeight) +
+    getMultiplier(job.impactWeight)
+
+  const normalizedScore = (fitScore / (maxMultiplierSum * 100)) * 100
+
+  return Math.round(normalizedScore * 100) / 100
 }
 
 export function matchCandidates(
@@ -91,9 +112,19 @@ export function matchCandidates(
     skills: Skill[]
     riskLevel: string
   }>
-): CandidateMatch[] {
-  const matches: CandidateMatch[] = candidates
+): (CandidateMatch & { cgpaStatus: "PASS" | "FAIL" })[] {
+  const matches: (CandidateMatch & { cgpaStatus: "PASS" | "FAIL" })[] = candidates
     .map((c) => {
+      // Check CGPA Condition
+      let cgpaStatus: "PASS" | "FAIL" = "PASS"
+      if (job.cgpaThreshold !== null && job.cgpaCondition !== null) {
+        if (job.cgpaCondition === "above" && c.profile.cgpa < job.cgpaThreshold) {
+          cgpaStatus = "FAIL"
+        } else if (job.cgpaCondition === "below" && c.profile.cgpa > job.cgpaThreshold) {
+          cgpaStatus = "FAIL"
+        }
+      }
+
       const fitScore = calculateFitScore(c.skills, c.profile, job)
       const gapSummary = generateGapSummary(c.skills, c.profile, job)
 
@@ -103,6 +134,7 @@ export function matchCandidates(
         fitScore,
         riskLevel: c.riskLevel,
         gapSummary,
+        cgpaStatus,
         skillBreakdown: {
           complexity: getAverageSkillDimension(c.skills, "complexityScore"),
           consistency: getAverageSkillDimension(c.skills, "consistencyScore"),
@@ -113,7 +145,11 @@ export function matchCandidates(
         },
       }
     })
-    .filter((m) => m.fitScore >= job.minThreshold)
+    .filter((m) => {
+      // Exclude candidates failing CGPA condition
+      if (m.cgpaStatus === "FAIL") return false
+      return m.fitScore >= job.minThreshold
+    })
     .sort((a, b) => b.fitScore - a.fitScore)
 
   return matches
@@ -129,24 +165,32 @@ export function simulateRanking(
     skillBreakdown: Record<string, number>
   }>,
   weights: {
-    backendWeight: number
-    consistencyWeight: number
-    collaborationWeight: number
-    recencyWeight: number
-    impactWeight: number
-    cgpaWeight: number
+    backendWeight: number | string
+    consistencyWeight: number | string
+    collaborationWeight: number | string
+    recencyWeight: number | string
+    impactWeight: number | string
+    cgpaWeight?: number | string
   },
   minThreshold: number
 ): CandidateMatch[] {
   return candidates
     .map((c) => {
-      const fitScore =
-        weights.backendWeight * (c.skillBreakdown.complexity || 0) +
-        weights.consistencyWeight * (c.skillBreakdown.consistency || 0) +
-        weights.collaborationWeight * (c.skillBreakdown.collaboration || 0) +
-        weights.recencyWeight * (c.skillBreakdown.recency || 0) +
-        weights.impactWeight * (c.skillBreakdown.impact || 0) +
-        weights.cgpaWeight * (c.skillBreakdown.cgpa || 0)
+      const fitScoreRaw =
+        getMultiplier(weights.backendWeight) * (c.skillBreakdown.complexity || 0) +
+        getMultiplier(weights.consistencyWeight) * (c.skillBreakdown.consistency || 0) +
+        getMultiplier(weights.collaborationWeight) * (c.skillBreakdown.collaboration || 0) +
+        getMultiplier(weights.recencyWeight) * (c.skillBreakdown.recency || 0) +
+        getMultiplier(weights.impactWeight) * (c.skillBreakdown.impact || 0)
+
+      const maxMultiplierSum =
+        getMultiplier(weights.backendWeight) +
+        getMultiplier(weights.consistencyWeight) +
+        getMultiplier(weights.collaborationWeight) +
+        getMultiplier(weights.recencyWeight) +
+        getMultiplier(weights.impactWeight)
+
+      const fitScore = (fitScoreRaw / (maxMultiplierSum * 100)) * 100
 
       return {
         ...c,

@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { normalizeCGPA } from "@/lib/scoring"
 import { assessRisk } from "@/lib/risk"
 import { MatchSimulator } from "@/components/match-simulator"
+import { fetchGitHubData } from "@/lib/github"
 
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -17,11 +18,14 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   const allProfiles = db.candidateProfile.findAll()
   const allUsers = db.user.findAll().filter((u) => u.role === "candidate")
 
-  const candidateData = allProfiles.map((profile) => {
+  const candidateData = await Promise.all(allProfiles.map(async (profile) => {
     const candidateUser = allUsers.find((u) => u.id === profile.userId)
     if (!candidateUser) return null
     const skills = db.skill.findByCandidateId(profile.userId)
-    const risk = assessRisk(profile, skills)
+
+    // Fetch GitHub data for display in recruiter view
+    const githubData = profile.githubUsername ? await fetchGitHubData(profile.githubUsername) : null
+    const risk = assessRisk(profile, skills, githubData)
 
     const avgComplexity = skills.length > 0 ? skills.reduce((s, sk) => s + sk.complexityScore, 0) / skills.length : 0
     const avgConsistency = skills.length > 0 ? skills.reduce((s, sk) => s + sk.consistencyScore, 0) / skills.length : 0
@@ -35,6 +39,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       riskLevel: risk.level,
       gapSummary: `Overall: complexity ${avgComplexity.toFixed(0)}, consistency ${avgConsistency.toFixed(0)}, collaboration ${avgCollaboration.toFixed(0)}, recency ${avgRecency.toFixed(0)}, impact ${avgImpact.toFixed(0)}, CGPA ${normalizeCGPA(profile.cgpa).toFixed(0)}/100`,
       cgpa: profile.cgpa,
+      githubData,
       skillBreakdown: {
         complexity: avgComplexity,
         consistency: avgConsistency,
@@ -44,14 +49,9 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         cgpa: normalizeCGPA(profile.cgpa),
       },
     }
-  }).filter(Boolean) as Array<{
-    candidateId: string
-    candidateName: string
-    riskLevel: string
-    gapSummary: string
-    cgpa: number
-    skillBreakdown: Record<string, number>
-  }>
+  }))
+
+  const filteredCandidates = candidateData.filter(Boolean) as any[]
 
   return (
     <MatchSimulator
@@ -63,10 +63,11 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         collaborationWeight: job.collaborationWeight,
         recencyWeight: job.recencyWeight,
         impactWeight: job.impactWeight,
-        cgpaWeight: job.cgpaWeight,
       }}
       initialThreshold={job.minThreshold}
-      candidates={candidateData}
+      cgpaThreshold={job.cgpaThreshold}
+      cgpaCondition={job.cgpaCondition}
+      candidates={filteredCandidates}
     />
   )
 }

@@ -1,9 +1,30 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { updateProfileAction } from "@/lib/profile-actions"
+import { GitHubData } from "@/lib/github"
+import {
+  Edit3,
+  ExternalLink,
+  Code,
+  Star as StarIcon,
+  GitBranch,
   User,
   Mail,
   Github,
@@ -30,20 +51,94 @@ interface CandidateProfileViewProps {
     lastActiveDate: string
   } | null
   skillCount: number
+  githubData: GitHubData | null
 }
 
-export function CandidateProfileView({ user, profile, skillCount }: CandidateProfileViewProps) {
+export function CandidateProfileView({ user, profile, skillCount, githubData }: CandidateProfileViewProps) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const riskColor = profile?.riskScore === "Low"
     ? "bg-accent/15 text-accent border-accent/30"
     : profile?.riskScore === "Medium"
-    ? "bg-chart-3/15 text-chart-3 border-chart-3/30"
-    : "bg-destructive/15 text-destructive border-destructive/30"
+      ? "bg-chart-3/15 text-chart-3 border-chart-3/30"
+      : "bg-destructive/15 text-destructive border-destructive/30"
+
+  async function handleUpdate(formData: FormData) {
+    setLoading(true)
+    setError(null)
+    const result = await updateProfileAction(formData)
+    setLoading(false)
+
+    if (result.success) {
+      setOpen(false)
+      router.refresh()
+    } else {
+      setError(result.error || "Update failed")
+    }
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Profile</h1>
-        <p className="text-muted-foreground">Your candidate overview and credibility metrics</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Profile</h1>
+          <p className="text-muted-foreground">Your candidate overview and credibility metrics</p>
+        </div>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+              <Edit3 className="h-4 w-4" />
+              Edit Profile
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-card">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+              <DialogDescription>
+                Update your personal metrics and GitHub link.
+              </DialogDescription>
+            </DialogHeader>
+            <form action={handleUpdate} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" name="name" defaultValue={user.name} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cgpa">CGPA (0-10)</Label>
+                  <Input
+                    id="cgpa"
+                    name="cgpa"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    defaultValue={profile?.cgpa}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="githubUsername">GitHub Username</Label>
+                  <Input
+                    id="githubUsername"
+                    name="githubUsername"
+                    defaultValue={profile?.githubUsername}
+                  />
+                </div>
+              </div>
+              {error && <p className="text-sm text-destructive font-medium">{error}</p>}
+              <DialogFooter>
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -98,8 +193,8 @@ export function CandidateProfileView({ user, profile, skillCount }: CandidatePro
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="bg-card">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="bg-card lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-card-foreground">Personal Information</CardTitle>
           </CardHeader>
@@ -134,10 +229,10 @@ export function CandidateProfileView({ user, profile, skillCount }: CandidatePro
                 <p className="font-medium text-card-foreground">
                   {profile?.lastActiveDate
                     ? new Date(profile.lastActiveDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
                     : "N/A"}
                 </p>
               </div>
@@ -145,44 +240,116 @@ export function CandidateProfileView({ user, profile, skillCount }: CandidatePro
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-card lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-card-foreground">Data Completeness</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-card-foreground">GitHub Activity</CardTitle>
+              {profile?.githubUsername && (
+                <a
+                  href={`https://github.com/${profile.githubUsername}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-primary flex items-center gap-1 hover:underline"
+                >
+                  View Profile <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Profile completion</span>
-                <span className="font-medium text-card-foreground">{profile?.dataCompleteness ?? 0}%</span>
-              </div>
-              <Progress value={profile?.dataCompleteness ?? 0} className="h-2" />
-            </div>
+          <CardContent>
+            {githubData ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <Code className="h-5 w-5 mx-auto mb-1 text-primary" />
+                    <p className="text-[10px] text-muted-foreground uppercase">Repos</p>
+                    <p className="text-xl font-bold">{githubData.publicRepos}</p>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <StarIcon className="h-5 w-5 mx-auto mb-1 text-accent" />
+                    <p className="text-[10px] text-muted-foreground uppercase">Stars</p>
+                    <p className="text-xl font-bold">{githubData.totalStars}</p>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <GitBranch className="h-5 w-5 mx-auto mb-1 text-chart-3" />
+                    <p className="text-[10px] text-muted-foreground uppercase">Languages</p>
+                    <p className="text-xl font-bold">{Object.keys(githubData.languages).length}</p>
+                  </div>
+                </div>
 
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-card-foreground">CGPA Scale</h4>
-              <div className="flex items-end gap-1">
-                {[1, 2, 3, 4].map((n) => (
-                  <div
-                    key={n}
-                    className={`flex-1 rounded-t transition-all ${
-                      (profile?.cgpa ?? 0) >= n
-                        ? "bg-primary"
-                        : "bg-muted"
-                    }`}
-                    style={{ height: `${n * 16 + 8}px` }}
-                  />
-                ))}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Activity className="h-4 w-4" />
+                    Recent Repository Updates
+                  </h4>
+                  <div className="space-y-2">
+                    {githubData.recentRepos.map((repo) => (
+                      <div key={repo.name} className="flex items-center justify-between p-2 rounded-md border border-border/50 bg-muted/10">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{repo.name}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{repo.description || "No description"}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-4">
+                          <Badge variant="secondary" className="text-[10px] py-0">{repo.language || "Other"}</Badge>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {new Date(repo.updatedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>1.0</span>
-                <span>2.0</span>
-                <span>3.0</span>
-                <span>4.0</span>
+            ) : (
+              <div className="flex h-40 items-center justify-center flex-col text-center space-y-2">
+                <Github className="h-10 w-10 text-muted-foreground/20" />
+                <p className="text-sm text-muted-foreground">
+                  Connect your GitHub to showcase your activity & repos.
+                </p>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-card-foreground">Data Completeness</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Profile completion</span>
+              <span className="font-medium text-card-foreground">{profile?.dataCompleteness ?? 0}%</span>
+            </div>
+            <Progress value={profile?.dataCompleteness ?? 0} className="h-2" />
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-card-foreground">CGPA Credibility Progress</h4>
+            <div className="flex items-end gap-1 px-2">
+              {[2, 4, 6, 8, 10].map((n) => (
+                <div
+                  key={n}
+                  className={`flex-1 rounded-t transition-all duration-500 ${(profile?.cgpa ?? 0) >= n
+                    ? "bg-primary"
+                    : "bg-muted"
+                    }`}
+                  style={{ height: `${n * 10}px` }}
+                />
+              ))}
+            </div>
+            <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+              <span>Thresholds:</span>
+              <span>2.0</span>
+              <span>4.0</span>
+              <span>6.0</span>
+              <span>8.0</span>
+              <span>10.0</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -47,13 +47,15 @@ export interface Job {
   recruiterId: string
   title: string
   description: string
-  backendWeight: number
-  consistencyWeight: number
-  collaborationWeight: number
-  recencyWeight: number
-  impactWeight: number
-  cgpaWeight: number
+  backendWeight: number | string
+  consistencyWeight: number | string
+  collaborationWeight: number | string
+  recencyWeight: number | string
+  impactWeight: number | string
+  cgpaWeight: number | string
   minThreshold: number
+  cgpaThreshold: number | null
+  cgpaCondition: "above" | "below" | null
   createdAt: Date
 }
 
@@ -292,13 +294,15 @@ export function seedDatabase() {
     recruiterId: recruiter.id,
     title: "Senior Full-Stack Engineer",
     description: "Looking for a senior full-stack engineer with strong backend fundamentals, consistency in contributions, and ability to collaborate across teams.",
-    backendWeight: 0.25,
-    consistencyWeight: 0.20,
-    collaborationWeight: 0.15,
-    recencyWeight: 0.15,
-    impactWeight: 0.15,
-    cgpaWeight: 0.10,
+    backendWeight: "important",
+    consistencyWeight: "important",
+    collaborationWeight: "optional",
+    recencyWeight: "important",
+    impactWeight: "critical",
+    cgpaWeight: 0,
     minThreshold: 50,
+    cgpaThreshold: 3.5,
+    cgpaCondition: "above",
   })
 
   // Precomputed match results

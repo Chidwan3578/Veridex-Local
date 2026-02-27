@@ -17,7 +17,7 @@ export interface ScoreBreakdown {
   finalScore: number
 }
 
-export function normalizeCGPA(cgpa: number, scale: number = 4.0): number {
+export function normalizeCGPA(cgpa: number, scale: number = 10.0): number {
   return (cgpa / scale) * 100
 }
 

@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { calculateSkillScore } from "@/lib/scoring"
 import { assessRisk } from "@/lib/risk"
 import { CandidateImprovementView } from "@/components/candidate-improvement-view"
+import { fetchGitHubData } from "@/lib/github"
 
 export default async function CandidateImprovementPage() {
   const user = await getSession()
@@ -20,6 +21,8 @@ export default async function CandidateImprovementPage() {
     )
   }
 
+  const githubData = profile.githubUsername ? await fetchGitHubData(profile.githubUsername) : null
+
   const scoredSkills = skills.map((skill) => {
     const breakdown = calculateSkillScore(skill, profile.cgpa, profile.lastActiveDate)
     return {
@@ -29,7 +32,7 @@ export default async function CandidateImprovementPage() {
     }
   })
 
-  const riskAssessment = assessRisk(profile, skills)
+  const riskAssessment = assessRisk(profile, skills, githubData)
 
   return (
     <CandidateImprovementView
@@ -41,6 +44,7 @@ export default async function CandidateImprovementPage() {
       }}
       cgpa={profile.cgpa}
       overallScore={profile.overallScore}
+      githubData={githubData}
     />
   )
 }

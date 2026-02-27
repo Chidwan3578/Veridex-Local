@@ -12,6 +12,8 @@ import {
 } from "lucide-react"
 import type { ScoreBreakdown } from "@/lib/scoring"
 
+import { GitHubData } from "@/lib/github"
+
 interface ScoredSkill {
   name: string
   score: number
@@ -27,32 +29,46 @@ interface CandidateImprovementViewProps {
   }
   cgpa: number
   overallScore: number
+  githubData: GitHubData | null
 }
 
-function getImprovementSuggestions(skills: ScoredSkill[], cgpa: number): string[] {
+function getImprovementSuggestions(skills: ScoredSkill[], cgpa: number, githubData: GitHubData | null): string[] {
   const suggestions: string[] = []
 
+  // GitHub suggestions
+  if (!githubData) {
+    suggestions.push("Connect a valid GitHub account to demonstrate collaboration and recency.")
+  } else {
+    if (githubData.publicRepos === 0) {
+      suggestions.push("Create public repositories on GitHub to showcase your technical contributions.")
+    }
+    const lastActive = githubData.lastActivity ? new Date(githubData.lastActivity) : null
+    const monthsGitInactive = lastActive ? (new Date().getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24 * 30) : 100
+    if (monthsGitInactive > 3) {
+      suggestions.push("Push regular updates to GitHub to improve your recency and consistency metrics.")
+    }
+  }
+
+  // Skill-specific suggestions
   skills.forEach((skill) => {
     if (skill.breakdown.collaboration < 60) {
-      suggestions.push(`Improve collaboration on ${skill.name} by contributing to open-source projects or team-based work.`)
+      suggestions.push(`Improve collaboration on ${skill.name} by contributing to shared repositories.`)
     }
     if (skill.breakdown.recency < 60) {
-      suggestions.push(`Increase recent activity in ${skill.name} to improve recency scores.`)
+      suggestions.push(`Increase code activity in ${skill.name} to avoid skill score decay.`)
     }
     if (skill.breakdown.certification < 50) {
-      suggestions.push(`Earn certifications for ${skill.name} to boost your credential score.`)
-    }
-    if (skill.breakdown.complexity < 60) {
-      suggestions.push(`Take on more complex ${skill.name} projects to demonstrate advanced proficiency.`)
+      suggestions.push(`Earn certifications for ${skill.name} to maximize your credential bonus.`)
     }
   })
 
-  if (cgpa < 3.0) {
-    suggestions.push("Focus on improving academic performance to strengthen your normalized CGPA score.")
+  // CGPA suggestions (Scale of 10)
+  if (cgpa < 7.0) {
+    suggestions.push("Improve academic performance to reduce academic risk factors (Target > 7.0).")
   }
 
-  if (skills.length < 3) {
-    suggestions.push("Add more skills to your profile to improve data completeness and demonstrate versatility.")
+  if (skills.length < 5) {
+    suggestions.push("Track more skills to provide a more comprehensive overview of your versatility.")
   }
 
   return suggestions.slice(0, 6)
@@ -63,20 +79,21 @@ export function CandidateImprovementView({
   riskAssessment,
   cgpa,
   overallScore,
+  githubData,
 }: CandidateImprovementViewProps) {
-  const suggestions = getImprovementSuggestions(skills, cgpa)
+  const suggestions = getImprovementSuggestions(skills, cgpa, githubData)
 
   const riskColor = riskAssessment.level === "Low"
     ? "bg-accent/15 text-accent border-accent/30"
     : riskAssessment.level === "Medium"
-    ? "bg-chart-3/15 text-chart-3 border-chart-3/30"
-    : "bg-destructive/15 text-destructive border-destructive/30"
+      ? "bg-chart-3/15 text-chart-3 border-chart-3/30"
+      : "bg-destructive/15 text-destructive border-destructive/30"
 
   const riskIcon = riskAssessment.level === "Low"
     ? <CheckCircle2 className="h-5 w-5 text-accent" />
     : riskAssessment.level === "Medium"
-    ? <AlertTriangle className="h-5 w-5 text-chart-3" />
-    : <AlertTriangle className="h-5 w-5 text-destructive" />
+      ? <AlertTriangle className="h-5 w-5 text-chart-3" />
+      : <AlertTriangle className="h-5 w-5 text-destructive" />
 
   // Find weakest and strongest skills
   const sortedSkills = [...skills].sort((a, b) => a.breakdown.finalScore - b.breakdown.finalScore)

@@ -216,7 +216,7 @@ export function seedDatabase() {
   db.candidateProfile.create({
     userId: candidate1.id,
     githubUsername: "alexmorgan",
-    cgpa: 3.8,
+    cgpa: 9.5,
     overallScore: 82,
     riskScore: "Low",
     dataCompleteness: 95,
@@ -225,7 +225,7 @@ export function seedDatabase() {
   db.candidateProfile.create({
     userId: candidate2.id,
     githubUsername: "jordanrivera",
-    cgpa: 3.2,
+    cgpa: 8.0,
     overallScore: 71,
     riskScore: "Medium",
     dataCompleteness: 80,
@@ -234,7 +234,7 @@ export function seedDatabase() {
   db.candidateProfile.create({
     userId: candidate3.id,
     githubUsername: "priyasharma",
-    cgpa: 3.95,
+    cgpa: 9.87,
     overallScore: 89,
     riskScore: "Low",
     dataCompleteness: 98,
@@ -301,7 +301,7 @@ export function seedDatabase() {
     impactWeight: "critical",
     cgpaWeight: 0,
     minThreshold: 50,
-    cgpaThreshold: 3.5,
+    cgpaThreshold: 8.5,
     cgpaCondition: "above",
   })
 

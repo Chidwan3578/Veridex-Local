@@ -36,6 +36,15 @@ interface CandidateSkillsViewProps {
   cgpa: number
 }
 
+const DOMAIN_COLORS = [
+  "hsl(var(--primary))",
+  "#10b981", // Success / Green
+  "#8b5cf6", // Purple
+  "#f59e0b", // Amber
+  "#ef4444", // Red
+  "#06b6d4", // Cyan
+]
+
 const CHART_COLORS = [
   "var(--color-chart-1)",
   "var(--color-chart-2)",
@@ -48,13 +57,13 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
   // Radar chart data: average of each dimension across all skills
   const radarData = skills.length > 0
     ? [
-        { dimension: "Complexity", value: Math.round(skills.reduce((s, sk) => s + sk.complexityScore, 0) / skills.length) },
-        { dimension: "Consistency", value: Math.round(skills.reduce((s, sk) => s + sk.consistencyScore, 0) / skills.length) },
-        { dimension: "Collaboration", value: Math.round(skills.reduce((s, sk) => s + sk.collaborationScore, 0) / skills.length) },
-        { dimension: "Recency", value: Math.round(skills.reduce((s, sk) => s + sk.recencyScore, 0) / skills.length) },
-        { dimension: "Impact", value: Math.round(skills.reduce((s, sk) => s + sk.impactScore, 0) / skills.length) },
-        { dimension: "Certification", value: Math.round(skills.reduce((s, sk) => s + sk.certificationBonus, 0) / skills.length) },
-      ]
+      { dimension: "Complexity", value: Math.round(skills.reduce((s, sk) => s + sk.complexityScore, 0) / skills.length) },
+      { dimension: "Consistency", value: Math.round(skills.reduce((s, sk) => s + sk.consistencyScore, 0) / skills.length) },
+      { dimension: "Collaboration", value: Math.round(skills.reduce((s, sk) => s + sk.collaborationScore, 0) / skills.length) },
+      { dimension: "Recency", value: Math.round(skills.reduce((s, sk) => s + sk.recencyScore, 0) / skills.length) },
+      { dimension: "Impact", value: Math.round(skills.reduce((s, sk) => s + sk.impactScore, 0) / skills.length) },
+      { dimension: "Certification", value: Math.round(skills.reduce((s, sk) => s + sk.certificationBonus, 0) / skills.length) },
+    ]
     : []
 
   // Timeline data: merge all skill histories
@@ -67,6 +76,36 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
     })
     return entry
   })
+
+  const radarDataMulti = radarData.map((d, i) => {
+    const entry: any = { ...d }
+    radarData.forEach((_, j) => {
+      const nextJ = (j + 1) % radarData.length
+      if (i === j || i === nextJ) {
+        entry[`v_${j}`] = d.value
+      } else {
+        entry[`v_${j}`] = 0
+      }
+    })
+    return entry
+  })
+
+  const CustomPolarAngleAxisTick = (props: any) => {
+    const { x, y, payload, index, cx, cy } = props
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor={x > cx ? "start" : x < cx ? "end" : "middle"}
+        dominantBaseline="central"
+        fill={DOMAIN_COLORS[index % DOMAIN_COLORS.length]}
+        fontSize={12}
+        fontWeight="600"
+      >
+        {payload.value}
+      </text>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -84,24 +123,35 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
           <CardContent>
             {radarData.length > 0 ? (
               <ResponsiveContainer width="100%" height={320}>
-                <RadarChart data={radarData}>
+                <RadarChart data={radarDataMulti} outerRadius="80%">
                   <PolarGrid stroke="var(--color-border)" />
                   <PolarAngleAxis
                     dataKey="dimension"
-                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
+                    tick={(props) => <CustomPolarAngleAxisTick {...props} />}
                   />
                   <PolarRadiusAxis
                     angle={30}
                     domain={[0, 100]}
                     tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }}
                   />
-                  <Radar
-                    name="Average Score"
-                    dataKey="value"
-                    stroke="var(--color-primary)"
-                    fill="var(--color-primary)"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
+                  {radarData.map((_, i) => (
+                    <Radar
+                      key={i}
+                      name={radarData[i].dimension}
+                      dataKey={`v_${i}`}
+                      stroke={DOMAIN_COLORS[i]}
+                      fill={DOMAIN_COLORS[i]}
+                      fillOpacity={0.3}
+                      strokeWidth={2}
+                    />
+                  ))}
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "var(--color-card)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "8px",
+                      color: "var(--color-card-foreground)",
+                    }}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -122,7 +172,7 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
             <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-8 border-primary/20">
               <div className="text-center">
                 <p className="text-4xl font-bold text-primary">{cgpa.toFixed(2)}</p>
-                <p className="text-sm text-muted-foreground">out of 4.00</p>
+                <p className="text-sm text-muted-foreground">out of 10.00</p>
               </div>
               <svg className="absolute inset-0 -rotate-90" viewBox="0 0 160 160">
                 <circle
@@ -132,14 +182,14 @@ export function CandidateSkillsView({ skills, cgpa }: CandidateSkillsViewProps) 
                   fill="none"
                   stroke="var(--color-primary)"
                   strokeWidth="8"
-                  strokeDasharray={`${(cgpa / 4) * 452.4} 452.4`}
+                  strokeDasharray={`${(cgpa / 10) * 452.4} 452.4`}
                   strokeLinecap="round"
                 />
               </svg>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Normalized Score: <span className="font-semibold text-card-foreground">{((cgpa / 4) * 100).toFixed(0)}/100</span>
+                Normalized Score: <span className="font-semibold text-card-foreground">{((cgpa / 10) * 100).toFixed(0)}/100</span>
               </p>
             </div>
           </CardContent>

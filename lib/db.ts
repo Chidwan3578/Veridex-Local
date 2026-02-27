@@ -25,6 +25,7 @@ export interface CandidateProfile {
   leetcodeRank: number | null
   linkedinUrl: string | null
   linkedinCertificationsCount: number | null
+  linkedinCertifications: string | null
   resumeText: string | null
 }
 
@@ -190,7 +191,7 @@ export function seedDatabase() {
   const recruiter = db.user.create({
     name: "Sarah Chen",
     email: "recruiter@veridex.io",
-    password: "password123",
+    password: "pass",
     role: "recruiter",
     image: null,
   })
@@ -199,26 +200,39 @@ export function seedDatabase() {
   const candidate1 = db.user.create({
     name: "Alex Morgan",
     email: "alex@example.com",
-    password: "password123",
+    password: "pass",
     role: "candidate",
     image: null,
   })
   const candidate2 = db.user.create({
     name: "Jordan Rivera",
     email: "jordan@example.com",
-    password: "password123",
+    password: "pass",
     role: "candidate",
     image: null,
   })
   const candidate3 = db.user.create({
     name: "Priya Sharma",
     email: "priya@example.com",
-    password: "password123",
+    password: "pass",
+    role: "candidate",
+    image: null,
+  })
+  const candidate4 = db.user.create({
+    name: "David Chen",
+    email: "david@example.com",
+    password: "pass",
+    role: "candidate",
+    image: null,
+  })
+  const candidate5 = db.user.create({
+    name: "Elena Rodriguez",
+    email: "elena@example.com",
+    password: "pass",
     role: "candidate",
     image: null,
   })
 
-  // Candidate profiles
   // Candidate profiles
   db.candidateProfile.create({
     userId: candidate1.id,
@@ -233,6 +247,7 @@ export function seedDatabase() {
     leetcodeRank: 12000,
     linkedinUrl: "https://linkedin.com/in/alexmorgan-dev",
     linkedinCertificationsCount: 7,
+    linkedinCertifications: "AWS Certified Solutions Architect, Google Professional Cloud Architect, Microsoft Certified: Azure Fundamentals",
     resumeText: "Senior Full-Stack Developer with expertise in React, Node.js, and Cloud Infrastructure. Proven track record of leading technical teams and delivering high-impact features.",
   })
   db.candidateProfile.create({
@@ -248,6 +263,7 @@ export function seedDatabase() {
     leetcodeRank: 150000,
     linkedinUrl: "https://linkedin.com/in/jrivera",
     linkedinCertificationsCount: 1,
+    linkedinCertifications: null,
     resumeText: null,
   })
   db.candidateProfile.create({
@@ -263,14 +279,47 @@ export function seedDatabase() {
     leetcodeRank: 5000,
     linkedinUrl: "https://linkedin.com/in/priyasharma",
     linkedinCertificationsCount: 8,
+    linkedinCertifications: "TensorFlow Developer Certificate, Deep Learning Specialization, Data Science Professional Certificate",
     resumeText: "Data Scientist specializing in Machine Learning, Python, and TensorFlow. Proficient in data analysis and building predictive models.",
+  })
+  db.candidateProfile.create({
+    userId: candidate4.id,
+    githubUsername: "dchen_dev",
+    cgpa: 8.9,
+    overallScore: 82,
+    riskScore: "Low",
+    dataCompleteness: 90,
+    lastActiveDate: new Date("2026-01-10"),
+    leetcodeUsername: "dchen_lc",
+    leetcodeScore: 1800,
+    leetcodeRank: 45000,
+    linkedinUrl: "https://linkedin.com/in/dchen",
+    linkedinCertificationsCount: 4,
+    linkedinCertifications: "Meta Front-End Developer Professional Certificate, UX Design Certificate",
+    resumeText: "Frontend expert specialized in Next.js and Tailwind. Strong eye for design and performance optimization.",
+  })
+  db.candidateProfile.create({
+    userId: candidate5.id,
+    githubUsername: "erodriguez",
+    cgpa: 9.2,
+    overallScore: 78,
+    riskScore: "High",
+    dataCompleteness: 85,
+    lastActiveDate: new Date("2025-12-05"),
+    leetcodeUsername: "elena_codes",
+    leetcodeScore: 1100,
+    leetcodeRank: 200000,
+    linkedinUrl: "https://linkedin.com/in/elenarodriguez",
+    linkedinCertificationsCount: 2,
+    linkedinCertifications: "HashiCorp Certified: Terraform Associate, AWS Certified SysOps Administrator",
+    resumeText: "DevOps Engineer with experience in Kubernetes, Docker, and CI/CD pipelines. Passionate about automation.",
   })
 
   // Demo Master Profile
   const demoMaster = db.user.create({
     name: "Demo Master",
     email: "demo@veridex.io",
-    password: "password123",
+    password: "pass",
     role: "candidate",
     image: null,
   })
@@ -288,74 +337,64 @@ export function seedDatabase() {
     leetcodeRank: 120,
     linkedinUrl: "https://linkedin.com/in/demomaster",
     linkedinCertificationsCount: 12,
+    linkedinCertifications: "AWS Certified Security - Specialty, Google Professional Data Engineer, CKA: Certified Kubernetes Administrator, Oracle Cloud Infrastructure Architect",
     resumeText: "Elite Software Engineer with expertise in distributed systems, AI, and cloud architecture. LeetCode Guardian and multi-certified cloud professional.",
   })
 
-  // Skills for Demo Master
-  const demoSkills = [
-    { name: "System Design", score: 96, complexityScore: 98, consistencyScore: 95, collaborationScore: 92, recencyScore: 98, impactScore: 95, certificationBonus: 95 },
-    { name: "Algorithms", score: 98, complexityScore: 99, consistencyScore: 98, collaborationScore: 90, recencyScore: 99, impactScore: 94, certificationBonus: 90 },
-    { name: "Cloud Architecture", score: 92, complexityScore: 90, consistencyScore: 92, collaborationScore: 95, recencyScore: 90, impactScore: 92, certificationBonus: 100 },
+  // Skills for everyone
+  const allCandidates = [
+    {
+      id: demoMaster.id, skills: [
+        { name: "System Design", score: 96, complexityScore: 98, consistencyScore: 95, collaborationScore: 92, recencyScore: 98, impactScore: 95, certificationBonus: 95 },
+        { name: "Algorithms", score: 98, complexityScore: 99, consistencyScore: 98, collaborationScore: 90, recencyScore: 99, impactScore: 94, certificationBonus: 90 },
+        { name: "Cloud Architecture", score: 92, complexityScore: 90, consistencyScore: 92, collaborationScore: 95, recencyScore: 90, impactScore: 92, certificationBonus: 100 },
+      ]
+    },
+    {
+      id: candidate1.id, skills: [
+        { name: "React", score: 88, complexityScore: 85, consistencyScore: 90, collaborationScore: 82, recencyScore: 95, impactScore: 80, certificationBonus: 90 },
+        { name: "Node.js", score: 82, complexityScore: 80, consistencyScore: 85, collaborationScore: 78, recencyScore: 88, impactScore: 75, certificationBonus: 70 },
+        { name: "TypeScript", score: 90, complexityScore: 88, consistencyScore: 92, collaborationScore: 85, recencyScore: 93, impactScore: 82, certificationBonus: 85 },
+      ]
+    },
+    {
+      id: candidate2.id, skills: [
+        { name: "Java", score: 78, complexityScore: 75, consistencyScore: 80, collaborationScore: 65, recencyScore: 55, impactScore: 72, certificationBonus: 80 },
+        { name: "Spring Boot", score: 72, complexityScore: 70, consistencyScore: 75, collaborationScore: 60, recencyScore: 50, impactScore: 68, certificationBonus: 70 },
+      ]
+    },
+    {
+      id: candidate3.id, skills: [
+        { name: "Python", score: 92, complexityScore: 90, consistencyScore: 95, collaborationScore: 88, recencyScore: 96, impactScore: 90, certificationBonus: 95 },
+        { name: "Machine Learning", score: 88, complexityScore: 92, consistencyScore: 85, collaborationScore: 80, recencyScore: 90, impactScore: 88, certificationBonus: 85 },
+      ]
+    },
+    {
+      id: candidate4.id, skills: [
+        { name: "React", score: 94, complexityScore: 88, consistencyScore: 96, collaborationScore: 85, recencyScore: 98, impactScore: 88, certificationBonus: 80 },
+        { name: "Next.js", score: 92, complexityScore: 90, consistencyScore: 92, collaborationScore: 80, recencyScore: 95, impactScore: 85, certificationBonus: 70 },
+      ]
+    },
+    {
+      id: candidate5.id, skills: [
+        { name: "Kubernetes", score: 85, complexityScore: 92, consistencyScore: 80, collaborationScore: 75, recencyScore: 82, impactScore: 90, certificationBonus: 90 },
+        { name: "Docker", score: 88, complexityScore: 85, consistencyScore: 88, collaborationScore: 80, recencyScore: 85, impactScore: 82, certificationBonus: 85 },
+      ]
+    },
   ]
 
-  demoSkills.forEach((s) => {
-    const skill = db.skill.create({ candidateId: demoMaster.id, ...s })
-    const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
-    months.forEach((m, i) => {
-      db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(70, s.score - 10 + i * 2 + Math.floor(Math.random() * 3)) })
+  allCandidates.forEach((c) => {
+    c.skills.forEach((s) => {
+      const skill = db.skill.create({ candidateId: c.id, ...s })
+      const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
+      months.forEach((m, i) => {
+        db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(40, s.score - 15 + i * 3 + Math.floor(Math.random() * 5)) })
+      })
     })
   })
 
-  // Skills for candidate 1
-  const skills1 = [
-    { name: "React", score: 88, complexityScore: 85, consistencyScore: 90, collaborationScore: 82, recencyScore: 95, impactScore: 80, certificationBonus: 90 },
-    { name: "Node.js", score: 82, complexityScore: 80, consistencyScore: 85, collaborationScore: 78, recencyScore: 88, impactScore: 75, certificationBonus: 70 },
-    { name: "TypeScript", score: 90, complexityScore: 88, consistencyScore: 92, collaborationScore: 85, recencyScore: 93, impactScore: 82, certificationBonus: 85 },
-    { name: "Python", score: 70, complexityScore: 65, consistencyScore: 72, collaborationScore: 68, recencyScore: 60, impactScore: 70, certificationBonus: 50 },
-    { name: "PostgreSQL", score: 75, complexityScore: 70, consistencyScore: 78, collaborationScore: 72, recencyScore: 80, impactScore: 68, certificationBonus: 60 },
-  ]
-  skills1.forEach((s) => {
-    const skill = db.skill.create({ candidateId: candidate1.id, ...s })
-    const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
-    months.forEach((m, i) => {
-      db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(40, s.score - 15 + i * 3 + Math.floor(Math.random() * 5)) })
-    })
-  })
-
-  // Skills for candidate 2
-  const skills2 = [
-    { name: "Java", score: 78, complexityScore: 75, consistencyScore: 80, collaborationScore: 65, recencyScore: 55, impactScore: 72, certificationBonus: 80 },
-    { name: "Spring Boot", score: 72, complexityScore: 70, consistencyScore: 75, collaborationScore: 60, recencyScore: 50, impactScore: 68, certificationBonus: 70 },
-    { name: "React", score: 65, complexityScore: 60, consistencyScore: 68, collaborationScore: 62, recencyScore: 70, impactScore: 55, certificationBonus: 40 },
-    { name: "Docker", score: 68, complexityScore: 72, consistencyScore: 65, collaborationScore: 58, recencyScore: 48, impactScore: 70, certificationBonus: 60 },
-    { name: "AWS", score: 60, complexityScore: 55, consistencyScore: 62, collaborationScore: 50, recencyScore: 45, impactScore: 58, certificationBonus: 75 },
-  ]
-  skills2.forEach((s) => {
-    const skill = db.skill.create({ candidateId: candidate2.id, ...s })
-    const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
-    months.forEach((m, i) => {
-      db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(30, s.score - 20 + i * 2 + Math.floor(Math.random() * 8)) })
-    })
-  })
-
-  // Skills for candidate 3
-  const skills3 = [
-    { name: "Python", score: 92, complexityScore: 90, consistencyScore: 95, collaborationScore: 88, recencyScore: 96, impactScore: 90, certificationBonus: 95 },
-    { name: "Machine Learning", score: 88, complexityScore: 92, consistencyScore: 85, collaborationScore: 80, recencyScore: 90, impactScore: 88, certificationBonus: 85 },
-    { name: "TensorFlow", score: 85, complexityScore: 88, consistencyScore: 82, collaborationScore: 78, recencyScore: 88, impactScore: 85, certificationBonus: 80 },
-    { name: "React", score: 72, complexityScore: 68, consistencyScore: 75, collaborationScore: 70, recencyScore: 78, impactScore: 65, certificationBonus: 60 },
-    { name: "PostgreSQL", score: 78, complexityScore: 75, consistencyScore: 80, collaborationScore: 76, recencyScore: 82, impactScore: 72, certificationBonus: 70 },
-  ]
-  skills3.forEach((s) => {
-    const skill = db.skill.create({ candidateId: candidate3.id, ...s })
-    const months = ["Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026"]
-    months.forEach((m, i) => {
-      db.skillHistory.create({ skillId: skill.id, month: m, score: Math.max(50, s.score - 10 + i * 2 + Math.floor(Math.random() * 4)) })
-    })
-  })
-
-  // Demo Job
-  const job = db.job.create({
+  // Create 5 Jobs
+  db.job.create({
     recruiterId: recruiter.id,
     title: "Senior Full-Stack Engineer",
     description: "Looking for a senior full-stack engineer with strong backend fundamentals, consistency in contributions, and ability to collaborate across teams.",
@@ -369,24 +408,81 @@ export function seedDatabase() {
     cgpaThreshold: 8.5,
     cgpaCondition: "above",
   })
+  db.job.create({
+    recruiterId: recruiter.id,
+    title: "AI/ML Scientist",
+    description: "Join our core AI team to build next-gen LLM applications. Strong Python and ML mathematical foundations required.",
+    backendWeight: "optional",
+    consistencyWeight: "important",
+    collaborationWeight: "important",
+    recencyWeight: "critical",
+    impactWeight: "critical",
+    cgpaWeight: 0,
+    minThreshold: 60,
+    cgpaThreshold: 9.0,
+    cgpaCondition: "above",
+  })
+  db.job.create({
+    recruiterId: recruiter.id,
+    title: "Frontend Architect",
+    description: "Lead our design system implementation and performance optimization across all web properties. Expert-level React/Next.js needed.",
+    backendWeight: "optional",
+    consistencyWeight: "critical",
+    collaborationWeight: "important",
+    recencyWeight: "important",
+    impactWeight: "important",
+    cgpaWeight: 0,
+    minThreshold: 55,
+    cgpaThreshold: null,
+    cgpaCondition: null,
+  })
+  db.job.create({
+    recruiterId: recruiter.id,
+    title: "DevOps Lead",
+    description: "Scale our global infrastructure using Kubernetes and Terraform. Focus on security, reliability, and developer experience.",
+    backendWeight: "important",
+    consistencyWeight: "important",
+    collaborationWeight: "critical",
+    recencyWeight: "important",
+    impactWeight: "critical",
+    cgpaWeight: 0,
+    minThreshold: 50,
+    cgpaThreshold: 7.5,
+    cgpaCondition: "above",
+  })
+  db.job.create({
+    recruiterId: recruiter.id,
+    title: "Data Engineer",
+    description: "Design and maintain high-volume data pipelines. Expertise in Spark, Kafka, and distributed systems is essential.",
+    backendWeight: "critical",
+    consistencyWeight: "important",
+    collaborationWeight: "optional",
+    recencyWeight: "important",
+    impactWeight: "important",
+    cgpaWeight: 0,
+    minThreshold: 50,
+    cgpaThreshold: 8.0,
+    cgpaCondition: "above",
+  })
 
-  // Precomputed match results
+  // Precomputed match results for the first job to ensure demo consistency
+  const firstJob = db.job.findAll()[0]
   db.matchResult.create({
-    jobId: job.id,
+    jobId: firstJob.id,
     candidateId: candidate1.id,
     fitScore: 79,
     riskLevel: "Low",
     gapSummary: "Strong frontend skills; backend experience could be deeper. Good collaboration track record.",
   })
   db.matchResult.create({
-    jobId: job.id,
+    jobId: firstJob.id,
     candidateId: candidate2.id,
     fitScore: 62,
     riskLevel: "Medium",
     gapSummary: "Solid Java/Spring background but declining recency scores. Low collaboration metrics flagged.",
   })
   db.matchResult.create({
-    jobId: job.id,
+    jobId: firstJob.id,
     candidateId: candidate3.id,
     fitScore: 85,
     riskLevel: "Low",

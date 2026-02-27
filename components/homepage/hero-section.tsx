@@ -1,22 +1,16 @@
+'use client'
+
 import Link from "next/link"
 import { ArrowRight, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import dynamic from "next/dynamic"
+
+import { SplineSection } from "./spline-section"
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
-      {/* Background grid pattern */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Glow effect */}
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
+    <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center bg-transparent">
+      <SplineSection />
 
       <div className="relative z-10 flex max-w-4xl flex-col items-center gap-8">
         <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur-sm">
@@ -30,7 +24,7 @@ export function HeroSection() {
           credibility scoring
         </h1>
 
-        <p className="max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">
+        <p className="max-w-2xl text-pretty text-lg leading-relaxed text-white md:text-xl">
           Multi-factor skill analysis, risk assessment, and weighted matching
           algorithms that go beyond resumes to surface truly qualified
           candidates.

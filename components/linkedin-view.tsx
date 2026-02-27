@@ -7,9 +7,10 @@ import { Linkedin, ExternalLink, ShieldCheck, Award } from "lucide-react"
 interface LinkedInViewProps {
     url: string | null
     certificationsCount: number | null
+    certifications: string | null
 }
 
-export function LinkedInView({ url, certificationsCount }: LinkedInViewProps) {
+export function LinkedInView({ url, certificationsCount, certifications }: LinkedInViewProps) {
     if (!url) {
         return (
             <Card className="bg-card">
@@ -25,6 +26,8 @@ export function LinkedInView({ url, certificationsCount }: LinkedInViewProps) {
             </Card>
         )
     }
+
+    const certList = certifications ? certifications.split(',').map(s => s.trim()).filter(Boolean) : []
 
     return (
         <Card className="bg-card">
@@ -45,30 +48,31 @@ export function LinkedInView({ url, certificationsCount }: LinkedInViewProps) {
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="flex items-center gap-4 bg-muted/30 rounded-lg p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0A66C2]/10">
-                        <Award className="h-5 w-5 text-[#0A66C2]" />
+                <div className="flex items-center gap-4 bg-muted/30 rounded-lg p-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0A66C2]/10">
+                        <Award className="h-4 w-4 text-[#0A66C2]" />
                     </div>
                     <div>
                         <p className="text-sm font-bold">{certificationsCount ?? 0} Certifications</p>
-                        <p className="text-[10px] text-muted-foreground uppercase">Verified Professional Growth</p>
+                        <p className="text-[10px] text-muted-foreground uppercase">Verified Growth</p>
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <h4 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        Verification Status
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline" className="text-[10px] bg-green-500/10 text-green-500 border-green-500/20">
-                            Identity Verified
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-500 border-blue-500/20">
-                            Verified Experience
-                        </Badge>
+                {certList.length > 0 && (
+                    <div className="space-y-2">
+                        <h4 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            Verified Credentials
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                            {certList.map((cert, i) => (
+                                <Badge key={i} variant="outline" className="text-[10px] bg-[#0A66C2]/5 text-[#0A66C2] border-[#0A66C2]/20">
+                                    {cert}
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </CardContent>
         </Card>
     )

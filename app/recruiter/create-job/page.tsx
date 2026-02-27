@@ -107,22 +107,31 @@ export default function CreateJobPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {priorityFields.map(({ key, label }) => (
-              <div key={key} className="flex items-center justify-between gap-4">
-                <Label className="text-card-foreground">{label}</Label>
-                <div className="w-[180px]">
-                  <Select
-                    value={priorities[key]}
-                    onValueChange={(v) => setPriorities((prev) => ({ ...prev, [key]: v }))}
-                  >
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="critical">Critical (2.0x)</SelectItem>
-                      <SelectItem value="important">Important (1.3x)</SelectItem>
-                      <SelectItem value="optional">Optional (1.0x)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div key={key} className="space-y-4 py-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-card-foreground font-medium">{label}</Label>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                    {priorities[key] === "critical" ? "High" : priorities[key] === "important" ? "Medium" : "Low"}
+                  </span>
+                </div>
+                <div className="px-2">
+                  <Slider
+                    min={0}
+                    max={2}
+                    step={1}
+                    value={[
+                      priorities[key] === "critical" ? 2 : priorities[key] === "important" ? 1 : 0
+                    ]}
+                    onValueChange={([v]) => {
+                      const val = v === 2 ? "critical" : v === 1 ? "important" : "optional"
+                      setPriorities((prev) => ({ ...prev, [key]: val }))
+                    }}
+                  />
+                  <div className="mt-2 flex justify-between text-[10px] font-medium uppercase tracking-tighter text-muted-foreground/60">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
                 </div>
               </div>
             ))}

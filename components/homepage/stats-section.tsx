@@ -25,19 +25,28 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="border-t border-border/50 bg-card/40">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-border/50 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.value} className="flex flex-col gap-3 p-8 lg:p-10">
-            <stat.icon className="h-5 w-5 text-primary" />
-            <p className="text-2xl font-bold tracking-tight text-foreground">
-              {stat.value}
-            </p>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {stat.label}
-            </p>
-          </div>
-        ))}
+    <section className="bg-[#030303] px-6 py-12 md:py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.value}
+              className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-card/30 p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-card/50 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/20 backdrop-blur-sm">
+                <stat.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight text-foreground">
+                  {stat.value}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground/80">
+                  {stat.label}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

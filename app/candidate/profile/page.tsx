@@ -21,6 +21,12 @@ export default async function CandidateProfilePage() {
         overallScore: profile.overallScore,
         riskScore: profile.riskScore,
         dataCompleteness: profile.dataCompleteness,
+        leetcodeUsername: profile.leetcodeUsername,
+        leetcodeScore: profile.leetcodeScore,
+        leetcodeRank: profile.leetcodeRank,
+        linkedinUrl: profile.linkedinUrl,
+        linkedinCertificationsCount: profile.linkedinCertificationsCount,
+        linkedinCertifications: profile.linkedinCertifications,
         lastActiveDate: profile.lastActiveDate.toISOString(),
       } : null}
       skillCount={skills.length}

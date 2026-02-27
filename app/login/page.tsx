@@ -80,7 +80,7 @@ export default function LoginPage() {
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p><span className="font-mono text-foreground">recruiter@veridex.io</span> (Recruiter)</p>
                   <p><span className="font-mono text-foreground">alex@example.com</span> (Candidate)</p>
-                  <p>Password for all: <span className="font-mono text-foreground">password123</span></p>
+                  <p>Password for all: <span className="font-mono text-foreground">pass</span></p>
                 </div>
               </div>
             </form>

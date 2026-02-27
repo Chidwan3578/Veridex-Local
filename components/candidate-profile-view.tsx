@@ -53,6 +53,7 @@ interface CandidateProfileViewProps {
     leetcodeRank: number | null
     linkedinUrl: string | null
     linkedinCertificationsCount: number | null
+    linkedinCertifications: string | null
     cgpa: number
     overallScore: number
     riskScore: string
@@ -167,22 +168,15 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
                     defaultValue={profile?.leetcodeRank || 0}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 col-span-2">
                   <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
                   <Input
                     id="linkedinUrl"
                     name="linkedinUrl"
+                    placeholder="linkedin.com/in/username"
                     defaultValue={profile?.linkedinUrl || ""}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="linkedinCertificationsCount">LinkedIn Certs Count</Label>
-                  <Input
-                    id="linkedinCertificationsCount"
-                    name="linkedinCertificationsCount"
-                    type="number"
-                    defaultValue={profile?.linkedinCertificationsCount || 0}
-                  />
+                  <p className="text-[10px] text-muted-foreground italic">Certifications will be fetched automatically.</p>
                 </div>
               </div>
               {error && <p className="text-sm text-destructive font-medium">{error}</p>}
@@ -248,6 +242,75 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
         </Card>
       </div>
 
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-card-foreground">External Credentials</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-3">
+            <LeetCodeView
+              username={profile?.leetcodeUsername || null}
+              score={profile?.leetcodeScore || null}
+              rank={profile?.leetcodeRank || null}
+            />
+            <LinkedInView
+              url={profile?.linkedinUrl || null}
+              certificationsCount={profile?.linkedinCertificationsCount || null}
+              certifications={profile?.linkedinCertifications || null}
+            />
+            <Card className="bg-muted/10 border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Github className="h-4 w-4 text-primary" />
+                    GitHub Summary
+                  </CardTitle>
+                  {profile?.githubUsername && (
+                    <a
+                      href={`https://github.com/${profile.githubUsername}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[10px] text-primary flex items-center gap-1 hover:underline"
+                    >
+                      View <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {githubData ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center justify-between bg-muted/30 rounded-lg p-2">
+                      <div className="flex items-center gap-2">
+                        <Code className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground uppercase">Repos</span>
+                      </div>
+                      <span className="text-lg font-bold">{githubData.publicRepos}</span>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 rounded-lg p-2">
+                      <div className="flex items-center gap-2">
+                        <StarIcon className="h-4 w-4 text-accent" />
+                        <span className="text-xs text-muted-foreground uppercase">Stars</span>
+                      </div>
+                      <span className="text-lg font-bold">{githubData.totalStars}</span>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 rounded-lg p-2">
+                      <div className="flex items-center gap-2">
+                        <GitBranch className="h-4 w-4 text-chart-3" />
+                        <span className="text-xs text-muted-foreground uppercase">Languages</span>
+                      </div>
+                      <span className="text-lg font-bold">{Object.keys(githubData.languages).length}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic text-center py-4">Link GitHub to view stats.</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="bg-card lg:col-span-1">
           <CardHeader>
@@ -298,34 +361,13 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
         <Card className="bg-card lg:col-span-2">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-card-foreground">External Profiles</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <LeetCodeView
-                username={profile?.leetcodeUsername || null}
-                score={profile?.leetcodeScore || null}
-                rank={profile?.leetcodeRank || null}
-              />
-              <LinkedInView
-                url={profile?.linkedinUrl || null}
-                certificationsCount={profile?.linkedinCertificationsCount || null}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card lg:col-span-3">
-          <CardHeader>
-            <div className="flex items-center justify-between">
               <CardTitle className="text-card-foreground">GitHub Activity</CardTitle>
               {profile?.githubUsername && (
                 <a
                   href={`https://github.com/${profile.githubUsername}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs text-primary flex items-center gap-1 hover:underline"
+                  className="text-xs text-primary flex items-center gap-1 hover:underline card-link"
                 >
                   View Profile <ExternalLink className="h-3 w-3" />
                 </a>
@@ -334,46 +376,26 @@ export function CandidateProfileView({ user, profile, skillCount, githubData }: 
           </CardHeader>
           <CardContent>
             {githubData ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <Code className="h-5 w-5 mx-auto mb-1 text-primary" />
-                    <p className="text-[10px] text-muted-foreground uppercase">Repos</p>
-                    <p className="text-xl font-bold">{githubData.publicRepos}</p>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <StarIcon className="h-5 w-5 mx-auto mb-1 text-accent" />
-                    <p className="text-[10px] text-muted-foreground uppercase">Stars</p>
-                    <p className="text-xl font-bold">{githubData.totalStars}</p>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <GitBranch className="h-5 w-5 mx-auto mb-1 text-chart-3" />
-                    <p className="text-[10px] text-muted-foreground uppercase">Languages</p>
-                    <p className="text-xl font-bold">{Object.keys(githubData.languages).length}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    Recent Repository Updates
-                  </h4>
-                  <div className="space-y-2">
-                    {githubData.recentRepos.map((repo) => (
-                      <div key={repo.name} className="flex items-center justify-between p-2 rounded-md border border-border/50 bg-muted/10">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{repo.name}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{repo.description || "No description"}</p>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-4">
-                          <Badge variant="secondary" className="text-[10px] py-0">{repo.language || "Other"}</Badge>
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {new Date(repo.updatedAt).toLocaleDateString()}
-                          </p>
-                        </div>
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Recent Repository Updates
+                </h4>
+                <div className="space-y-2">
+                  {githubData.recentRepos.map((repo) => (
+                    <div key={repo.name} className="flex items-center justify-between p-2 rounded-md border border-border/50 bg-muted/10">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{repo.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{repo.description || "No description"}</p>
                       </div>
-                    ))}
-                  </div>
+                      <div className="text-right flex-shrink-0 ml-4">
+                        <Badge variant="secondary" className="text-[10px] py-0">{repo.language || "Other"}</Badge>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {new Date(repo.updatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (

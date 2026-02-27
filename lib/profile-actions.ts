@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { getSession } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { calculateOverallScore } from "@/lib/scoring"
+import { fetchLinkedInCertifications } from "@/lib/linkedin"
 
 
 export async function updateProfileAction(formData: FormData) {
@@ -19,7 +20,6 @@ export async function updateProfileAction(formData: FormData) {
     const leetcodeScore = parseFloat(formData.get("leetcodeScore") as string) || 0
     const leetcodeRank = parseInt(formData.get("leetcodeRank") as string) || 0
     const linkedinUrl = formData.get("linkedinUrl") as string
-    const linkedinCertificationsCount = parseInt(formData.get("linkedinCertificationsCount") as string) || 0
 
     if (!name || isNaN(cgpa)) {
         return { error: "Name and valid CGPA are required" }
@@ -33,10 +33,15 @@ export async function updateProfileAction(formData: FormData) {
         // Update user name
         db.user.update(user.id, { name })
 
+        // 1. Fetch LinkedIn Certifications automatically
+        const certList = await fetchLinkedInCertifications(linkedinUrl)
+        const linkedinCertifications = certList.join(", ")
+        const linkedinCertificationsCount = certList.length
+
         // Fetch skills to calculate overall score
         const skills = db.skill.findByCandidateId(user.id)
         const lastActiveDate = new Date()
-        const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate, leetcodeScore, linkedinCertificationsCount)
+        const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate, leetcodeScore, linkedinCertifications)
 
         // Update candidate profile
         const existingProfile = db.candidateProfile.findByUserId(user.id)
@@ -48,6 +53,7 @@ export async function updateProfileAction(formData: FormData) {
             leetcodeRank,
             linkedinUrl,
             linkedinCertificationsCount,
+            linkedinCertifications,
             overallScore,
             riskScore: "Low",
             dataCompleteness: 100,
@@ -56,6 +62,7 @@ export async function updateProfileAction(formData: FormData) {
         })
 
         revalidatePath("/candidate/dashboard")
+        revalidatePath("/candidate/profile")
         return { success: true }
     } catch (error) {
         console.error("Error updating profile:", error)
@@ -77,6 +84,7 @@ export async function updateResumeAction(resumeText: string) {
         leetcodeRank: existingProfile?.leetcodeRank || 0,
         linkedinUrl: existingProfile?.linkedinUrl || null,
         linkedinCertificationsCount: existingProfile?.linkedinCertificationsCount || 0,
+        linkedinCertifications: existingProfile?.linkedinCertifications || null,
         overallScore: existingProfile?.overallScore || 0,
         riskScore: existingProfile?.riskScore || "Low",
         dataCompleteness: existingProfile?.dataCompleteness || 0,

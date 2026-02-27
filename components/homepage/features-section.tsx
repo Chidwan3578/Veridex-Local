@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Radar,
   SlidersHorizontal,
@@ -46,10 +48,20 @@ const features = [
   },
 ]
 
+import dynamic from "next/dynamic"
+
+const ShaderGradient = dynamic(
+  () => import("@/components/ui/shader-gradient-wrapper").then((mod) => mod.ShaderGradientWrapper),
+  { ssr: false }
+)
+
 export function FeaturesSection() {
   return (
-    <section className="border-t border-border/50 px-6 py-24">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative border-t border-border/50 px-6 py-32 overflow-hidden">
+      {/* 3D Background Gradient */}
+      <ShaderGradient />
+
+      <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <p className="mb-3 text-sm font-medium uppercase tracking-widest text-primary">
             Platform Capabilities
@@ -59,21 +71,23 @@ export function FeaturesSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border/50 bg-border/50 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex flex-col gap-4 bg-card p-8 transition-colors hover:bg-card/80"
+              className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-card/30 p-8 shadow-2xl backdrop-blur-2xl transition-all hover:bg-card/50 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <feature.icon className="h-5 w-5 text-primary" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 backdrop-blur-md border border-white/10">
+                <feature.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
-                {feature.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
+              <div>
+                <h3 className="text-xl font-bold text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground/80">
+                  {feature.description}
+                </p>
+              </div>
             </div>
           ))}
         </div>

@@ -229,23 +229,32 @@ export function MatchSimulator({
             </CardHeader>
             <CardContent className="space-y-5">
               {priorityFields.map(({ key, label }) => (
-                <div key={key} className="space-y-2">
+                <div key={key} className="space-y-3 py-1">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm text-card-foreground">{label}</Label>
+                    <Label className="text-xs font-semibold text-card-foreground">{label}</Label>
+                    <span className="text-[10px] font-bold uppercase text-primary">
+                      {weights[key] === "critical" ? "High" : weights[key] === "important" ? "Medium" : "Low"}
+                    </span>
                   </div>
-                  <Select
-                    value={String(weights[key])}
-                    onValueChange={(v) => setWeights((prev: any) => ({ ...prev, [key]: v }))}
-                  >
-                    <SelectTrigger className="bg-background h-8 text-xs">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="critical">Critical (2.0x)</SelectItem>
-                      <SelectItem value="important">Important (1.3x)</SelectItem>
-                      <SelectItem value="optional">Optional (1.0x)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="px-1">
+                    <Slider
+                      min={0}
+                      max={2}
+                      step={1}
+                      value={[
+                        weights[key] === "critical" ? 2 : weights[key] === "important" ? 1 : 0
+                      ]}
+                      onValueChange={([v]) => {
+                        const val = v === 2 ? "critical" : v === 1 ? "important" : "optional"
+                        setWeights((prev: any) => ({ ...prev, [key]: val }))
+                      }}
+                    />
+                    <div className="mt-1.5 flex justify-between text-[9px] font-bold uppercase tracking-tight text-muted-foreground/50">
+                      <span>Low</span>
+                      <span>Medium</span>
+                      <span>High</span>
+                    </div>
+                  </div>
                 </div>
               ))}
 

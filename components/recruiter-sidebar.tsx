@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAction } from "@/lib/actions"
 import { VeridexLogo } from "@/components/veridex-logo"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -107,16 +108,19 @@ export function RecruiterSidebar({ jobs = [] }: RecruiterSidebarProps) {
         </nav>
 
         <div className="border-t border-sidebar-border p-3">
-          <form action={logoutAction}>
-            <Button
-              type="submit"
-              variant="ghost"
-              className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </Button>
-          </form>
+          <div className="flex items-center justify-between">
+            <ThemeToggle />
+            <form action={logoutAction}>
+              <Button
+                type="submit"
+                variant="ghost"
+                className="gap-2 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
+            </form>
+          </div>
         </div>
       </aside>
 

@@ -37,7 +37,7 @@ interface CandidateSkillsViewProps {
 }
 
 const DOMAIN_COLORS = [
-  "hsl(var(--primary))",
+  "#3b82f6", // Blue (Changed from primary black)
   "#10b981", // Success / Green
   "#8b5cf6", // Purple
   "#f59e0b", // Amber

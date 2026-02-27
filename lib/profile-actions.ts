@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { getSession } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { calculateOverallScore } from "@/lib/scoring"
+
 
 export async function updateProfileAction(formData: FormData) {
     const user = await getSession()
@@ -26,15 +28,20 @@ export async function updateProfileAction(formData: FormData) {
         // Update user name
         db.user.update(user.id, { name })
 
+        // Fetch skills to calculate overall score
+        const skills = db.skill.findByCandidateId(user.id)
+        const lastActiveDate = new Date()
+        const overallScore = calculateOverallScore(skills, cgpa, lastActiveDate)
+
         // Update candidate profile
         db.candidateProfile.upsertByUserId(user.id, {
             cgpa,
             githubUsername,
             // Keep other fields as they are (in-memory db upsert handles this)
-            overallScore: 0, // In a real app, these would be recalculated
+            overallScore,
             riskScore: "Low",
             dataCompleteness: 100,
-            lastActiveDate: new Date(),
+            lastActiveDate,
         })
 
         revalidatePath("/candidate/dashboard")

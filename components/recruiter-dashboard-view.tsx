@@ -18,6 +18,7 @@ interface JobSummary {
   title: string
   description: string
   matchCount: number
+  maxApplicants: number
   topScore: number
   createdAt: string
 }
@@ -119,8 +120,15 @@ export function RecruiterDashboardView({ recruiterName, jobs, totalCandidates }:
                     <div className="flex items-center gap-3">
                       <h3 className="font-semibold text-card-foreground">{job.title}</h3>
                       <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-                        {job.matchCount} matches
+                        {job.matchCount} / {job.maxApplicants} Applicants
                       </Badge>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary transition-all duration-500"
+                        style={{ width: `${Math.min((job.matchCount / job.maxApplicants) * 100, 100)}%` }}
+                      />
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{job.description}</p>
                     <p className="text-xs text-muted-foreground">

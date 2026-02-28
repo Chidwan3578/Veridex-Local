@@ -17,6 +17,7 @@ export default async function RecruiterDashboardPage() {
       title: job.title,
       description: job.description,
       matchCount: matches.length,
+      maxApplicants: job.maxApplicants,
       topScore: matches.length > 0 ? Math.max(...matches.map((m) => m.fitScore)) : 0,
       createdAt: job.createdAt.toISOString(),
     }

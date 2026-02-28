@@ -63,6 +63,7 @@ export interface Job {
   minThreshold: number
   cgpaThreshold: number | null
   cgpaCondition: "above" | "below" | null
+  maxApplicants: number
   createdAt: Date
 }
 
@@ -163,7 +164,7 @@ export const db = {
     findByRecruiterId: (recruiterId: string) => jobs.filter((j) => j.recruiterId === recruiterId),
     findAll: () => [...jobs],
     create: (data: Omit<Job, "id" | "createdAt">) => {
-      const job: Job = { ...data, id: genId(), createdAt: new Date() }
+      const job: Job = { ...data, id: genId(), createdAt: new Date(), maxApplicants: data.maxApplicants ?? 100 }
       jobs.push(job)
       return job
     },
@@ -256,15 +257,15 @@ export function seedDatabase() {
     cgpa: 8.0,
     overallScore: 71,
     riskScore: "Medium",
-    dataCompleteness: 80,
-    lastActiveDate: new Date("2025-11-20"),
-    leetcodeUsername: "jrivera",
-    leetcodeScore: 1200,
-    leetcodeRank: 150000,
+    dataCompleteness: 85,
+    lastActiveDate: new Date("2026-02-10"),
+    leetcodeUsername: "jrivera_lc",
+    leetcodeScore: 1450,
+    leetcodeRank: 85000,
     linkedinUrl: "https://linkedin.com/in/jrivera",
-    linkedinCertificationsCount: 1,
-    linkedinCertifications: null,
-    resumeText: null,
+    linkedinCertificationsCount: 3,
+    linkedinCertifications: "Oracle Certified Professional: Java SE Developer, Spring Framework Specialization",
+    resumeText: "Java Developer with experience in building enterprise applications using Spring Boot and Hibernate. Strong understanding of OOP principles.",
   })
   db.candidateProfile.create({
     userId: candidate3.id,
@@ -407,6 +408,7 @@ export function seedDatabase() {
     minThreshold: 50,
     cgpaThreshold: 8.5,
     cgpaCondition: "above",
+    maxApplicants: 100,
   })
   db.job.create({
     recruiterId: recruiter.id,
@@ -420,7 +422,8 @@ export function seedDatabase() {
     cgpaWeight: 0,
     minThreshold: 60,
     cgpaThreshold: 9.0,
-    cgpaCondition: "above",
+    cgpaCondition: "above" as const,
+    maxApplicants: 50,
   })
   db.job.create({
     recruiterId: recruiter.id,
@@ -435,6 +438,7 @@ export function seedDatabase() {
     minThreshold: 55,
     cgpaThreshold: null,
     cgpaCondition: null,
+    maxApplicants: 100,
   })
   db.job.create({
     recruiterId: recruiter.id,
@@ -449,6 +453,7 @@ export function seedDatabase() {
     minThreshold: 50,
     cgpaThreshold: 7.5,
     cgpaCondition: "above",
+    maxApplicants: 75,
   })
   db.job.create({
     recruiterId: recruiter.id,
@@ -462,31 +467,131 @@ export function seedDatabase() {
     cgpaWeight: 0,
     minThreshold: 50,
     cgpaThreshold: 8.0,
-    cgpaCondition: "above",
+    cgpaCondition: "above" as const,
+    maxApplicants: 120,
   })
 
-  // Precomputed match results for the first job to ensure demo consistency
-  const firstJob = db.job.findAll()[0]
+  // Precomputed match results for all jobs to ensure demo consistency
+  const allJobs = db.job.findAll()
+  const job1 = allJobs[0]
+  const job2 = allJobs[1]
+  const job3 = allJobs[2]
+  const job4 = allJobs[3]
+  const job5 = allJobs[4]
+
+  // Job 1: Senior Full-Stack Engineer
   db.matchResult.create({
-    jobId: firstJob.id,
+    jobId: job1.id,
     candidateId: candidate1.id,
     fitScore: 79,
     riskLevel: "Low",
     gapSummary: "Strong frontend skills; backend experience could be deeper. Good collaboration track record.",
   })
   db.matchResult.create({
-    jobId: firstJob.id,
+    jobId: job1.id,
     candidateId: candidate2.id,
     fitScore: 62,
     riskLevel: "Medium",
     gapSummary: "Solid Java/Spring background but declining recency scores. Low collaboration metrics flagged.",
   })
   db.matchResult.create({
-    jobId: firstJob.id,
+    jobId: job1.id,
     candidateId: candidate3.id,
     fitScore: 85,
     riskLevel: "Low",
     gapSummary: "Excellent overall profile with strong ML focus. May need ramping on full-stack specifics.",
+  })
+
+  // Job 2: AI/ML Scientist
+  db.matchResult.create({
+    jobId: job2.id,
+    candidateId: candidate3.id,
+    fitScore: 92,
+    riskLevel: "Low",
+    gapSummary: "Exceptional Python and ML background. Perfect fit for core AI team.",
+  })
+  db.matchResult.create({
+    jobId: job2.id,
+    candidateId: demoMaster.id,
+    fitScore: 96,
+    riskLevel: "Low",
+    gapSummary: "Elite engineer with deep algorithmic knowledge and AI expertise.",
+  })
+  db.matchResult.create({
+    jobId: job2.id,
+    candidateId: candidate1.id,
+    fitScore: 68,
+    riskLevel: "Low",
+    gapSummary: "Strong generalist; would need specific ML training but highly capable.",
+  })
+
+  // Job 3: Frontend Architect
+  db.matchResult.create({
+    jobId: job3.id,
+    candidateId: candidate4.id,
+    fitScore: 94,
+    riskLevel: "Low",
+    gapSummary: "Expert in React and Next.js. Strong eye for design and performance.",
+  })
+  db.matchResult.create({
+    jobId: job3.id,
+    candidateId: candidate1.id,
+    fitScore: 88,
+    riskLevel: "Low",
+    gapSummary: "Highly productive React developer with solid architecture experience.",
+  })
+  db.matchResult.create({
+    jobId: job3.id,
+    candidateId: candidate2.id,
+    fitScore: 71,
+    riskLevel: "Medium",
+    gapSummary: "Good React fundamentals; needs growth in system design for architect role.",
+  })
+
+  // Job 4: DevOps Lead
+  db.matchResult.create({
+    jobId: job4.id,
+    candidateId: candidate5.id,
+    fitScore: 88,
+    riskLevel: "High",
+    gapSummary: "Strong K8s/Docker skills. High risk due to recent activity gaps, but technically a top fit.",
+  })
+  db.matchResult.create({
+    jobId: job4.id,
+    candidateId: demoMaster.id,
+    fitScore: 95,
+    riskLevel: "Low",
+    gapSummary: "Elite multi-certified professional with extensive infra automation experience.",
+  })
+  db.matchResult.create({
+    jobId: job4.id,
+    candidateId: candidate1.id,
+    fitScore: 72,
+    riskLevel: "Low",
+    gapSummary: "Competent with CI/CD and cloud tools; good cross-functional DevOps potential.",
+  })
+
+  // Job 5: Data Engineer
+  db.matchResult.create({
+    jobId: job5.id,
+    candidateId: candidate3.id,
+    fitScore: 82,
+    riskLevel: "Low",
+    gapSummary: "Strong Python/Data background. Quickly adaptable to Spark/Kafka pipelines.",
+  })
+  db.matchResult.create({
+    jobId: job5.id,
+    candidateId: candidate1.id,
+    fitScore: 75,
+    riskLevel: "Low",
+    gapSummary: "Solid backend fundamentals; experienced in building scalable data services.",
+  })
+  db.matchResult.create({
+    jobId: job5.id,
+    candidateId: demoMaster.id,
+    fitScore: 91,
+    riskLevel: "Low",
+    gapSummary: "Architect-level knowledge of distributed systems and data pipelines.",
   })
 }
 

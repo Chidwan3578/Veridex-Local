@@ -3,7 +3,7 @@ import { Shield } from "lucide-react"
 
 export function FooterSection() {
   return (
-    <footer className="border-t border-border/50 px-6 py-12">
+    <footer className="relative z-50 border-t border-border/50 bg-background px-6 py-12">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">

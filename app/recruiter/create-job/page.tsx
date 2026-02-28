@@ -25,6 +25,7 @@ export default function CreateJobPage() {
   const [cgpaThreshold, setCgpaThreshold] = useState("7.0")
   const [cgpaCondition, setCgpaCondition] = useState("above")
   const [minThreshold, setMinThreshold] = useState(50)
+  const [maxApplicants, setMaxApplicants] = useState("100")
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -35,6 +36,7 @@ export default function CreateJobPage() {
     formData.set("cgpaThreshold", cgpaThreshold)
     formData.set("cgpaCondition", cgpaCondition)
     formData.set("minThreshold", minThreshold.toString())
+    formData.set("maxApplicants", maxApplicants)
 
     const result = await createJobAction(formData)
     if (result?.error) {
@@ -92,6 +94,19 @@ export default function CreateJobPage() {
                 placeholder="Describe the role, responsibilities, and ideal candidate..."
                 required
                 rows={4}
+                className="bg-background"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxApplicants" className="text-card-foreground">Max Applicants</Label>
+              <Input
+                id="maxApplicants"
+                name="maxApplicants"
+                type="number"
+                min="1"
+                value={maxApplicants}
+                onChange={(e) => setMaxApplicants(e.target.value)}
+                required
                 className="bg-background"
               />
             </div>

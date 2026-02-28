@@ -7,6 +7,7 @@ import { FeaturesSection } from "@/components/homepage/features-section"
 import { RolesSection } from "@/components/homepage/roles-section"
 import { FooterSection } from "@/components/homepage/footer-section"
 
+
 export default async function HomePage() {
   const user = await getSession()
 
@@ -23,6 +24,7 @@ export default async function HomePage() {
       <HomepageNav />
       <main className="flex-1">
         <HeroSection />
+
         <StatsSection />
         <FeaturesSection />
         <RolesSection />

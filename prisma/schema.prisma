@@ -70,6 +70,7 @@ model Job {
   minThreshold        Float
   cgpaThreshold       Float?
   cgpaCondition       String?  // "above" | "below"
+  maxApplicants       Int      @default(100)
   createdAt           DateTime @default(now())
   matches             MatchResult[]
 }

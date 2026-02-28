@@ -1,14 +1,7 @@
-'use client'
-
-import React, { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+// Server Component
+import Spline from '@splinetool/react-spline/next'
+import { Suspense } from 'react'
 import { cn } from '@/lib/utils'
-
-// Use dynamic import to ensure it only loads on the client
-const Spline = dynamic(() => import('@splinetool/react-spline'), {
-    ssr: false,
-    loading: () => <div className="text-white/20 animate-pulse">Initializing 3D...</div>
-})
 
 interface SplineBackgroundProps {
     className?: string
@@ -16,12 +9,11 @@ interface SplineBackgroundProps {
 
 export function SplineSection({ className }: SplineBackgroundProps) {
     return (
-        <div className={cn("absolute inset-0 z-0 overflow-hidden pointer-events-none", className)}>
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] md:w-[1600px] md:h-[1600px] opacity-80">
-                <Suspense fallback={null}>
+        <div className={cn("fixed inset-0 z-0 flex justify-center pointer-events-none", className)}>
+            <div className="relative w-full max-w-[1200px] h-full overflow-hidden pointer-events-auto pt-24">
+                <Suspense fallback={<div className="flex h-full w-full items-center justify-center text-white/20 animate-pulse">Initializing 3D...</div>}>
                     <Spline
-                        scene="https://prod.spline.design/qYckqqAECNbPvv3m/scene.splinecode"
-                        style={{ width: '100%', height: '100%' }}
+                        scene="https://prod.spline.design/h2msGHD5y-1HifYu/scene.splinecode"
                     />
                 </Suspense>
             </div>

@@ -76,6 +76,9 @@ export default async function CandidateJobsPage() {
             }
         })
 
+        // 6. Applicant Count
+        const applicantCount = db.matchResult.findByJobId(job.id).length
+
         return {
             id: job.id,
             title: job.title,
@@ -85,6 +88,7 @@ export default async function CandidateJobsPage() {
             cgpaStatus,
             cgpaRequirement: `${job.cgpaCondition === "above" ? ">" : "<"} ${job.cgpaThreshold}`,
             topPriorities,
+            applicantCount,
             skillGaps,
             isBestMatch: false, // Will calculate this after mapping
         }

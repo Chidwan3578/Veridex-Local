@@ -24,6 +24,7 @@ export async function createJobAction(formData: FormData) {
 
   const cgpaThreshold = formData.get("cgpaThreshold") ? parseFloat(formData.get("cgpaThreshold") as string) : null
   const cgpaCondition = formData.get("cgpaCondition") as "above" | "below" | null
+  const maxApplicants = parseInt(formData.get("maxApplicants") as string) || 100
 
   if (!title || !description) {
     return { error: "Title and description are required" }
@@ -42,6 +43,7 @@ export async function createJobAction(formData: FormData) {
     minThreshold,
     cgpaThreshold,
     cgpaCondition,
+    maxApplicants,
   })
 
   // Auto-run matching

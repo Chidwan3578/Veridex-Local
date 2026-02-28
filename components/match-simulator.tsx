@@ -83,9 +83,9 @@ interface MatchSimulatorProps {
 
 function getRiskBadgeClass(level: string) {
   switch (level) {
-    case "Low": return "border-accent/30 bg-accent/15 text-accent"
-    case "Medium": return "border-chart-3/30 bg-chart-3/15 text-chart-3"
-    case "High": return "border-destructive/30 bg-destructive/15 text-destructive"
+    case "Low": return "border-primary/30 bg-primary/10 text-primary"
+    case "Medium": return "border-yellow-500/30 bg-yellow-500/10 text-yellow-500"
+    case "High": return "border-red-500/30 bg-red-500/10 text-red-500"
     default: return ""
   }
 }
@@ -296,24 +296,30 @@ export function MatchSimulator({
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2e1065" vertical={false} />
                       <XAxis
                         dataKey="name"
-                        tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
+                        tick={{ fill: "#94a3b8", fontSize: 12 }}
+                        axisLine={{ stroke: '#2e1065' }}
+                        tickLine={false}
                       />
                       <YAxis
                         domain={[0, 100]}
-                        tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
+                        tick={{ fill: "#94a3b8", fontSize: 12 }}
+                        axisLine={{ stroke: '#2e1065' }}
+                        tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "var(--color-card)",
-                          border: "1px solid var(--color-border)",
+                          backgroundColor: "#050505",
+                          border: "1px solid #2e1065",
                           borderRadius: "8px",
-                          color: "var(--color-card-foreground)",
+                          color: "#f8fafc",
                         }}
+                        itemStyle={{ color: "#7c3aed" }}
+                        cursor={{ fill: 'rgba(124, 58, 237, 0.1)' }}
                       />
-                      <Bar dataKey="score" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="score" fill="#7c3aed" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (

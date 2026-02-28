@@ -34,6 +34,7 @@ export interface JobRecommendation {
     cgpaStatus: "PASS" | "FAIL"
     cgpaRequirement: string
     topPriorities: string[]
+    applicantCount: number
     skillGaps: string[]
     isBestMatch: boolean
 }
@@ -125,9 +126,14 @@ export function CandidateJobsList({ jobs }: CandidateJobsListProps) {
                                     <p className="text-3xl font-black text-primary">
                                         {job.matchPercentage.toFixed(0)}%
                                     </p>
-                                    <Badge variant="outline" className={`mt-1 py-0.5 ${getSuitabilityColor(job.suitability)}`}>
-                                        {job.suitability}
-                                    </Badge>
+                                    <div className="flex flex-col items-end gap-1 mt-1">
+                                        <Badge variant="outline" className={`py-0.5 ${getSuitabilityColor(job.suitability)}`}>
+                                            {job.suitability}
+                                        </Badge>
+                                        <Badge variant="secondary" className="text-[10px] py-0 px-2 h-5 bg-muted/50 border-none">
+                                            {job.applicantCount} Applicants
+                                        </Badge>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
